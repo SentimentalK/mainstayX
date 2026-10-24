@@ -1,7 +1,7 @@
 // Back to work: a working agent sneaks off from its desk toward something
 // shiny. Either a free colleague (Claude by preference: the lead) storms over
 // and drags it back to its seat by the ear — "ow ow ow" — or Orca shouts
-// BACK TO WORK and reels it in on a tether.
+// "*CLICK* back!" and reels it in on a tether.
 import type { Agent } from '../agent';
 import { PAL } from '../../data/theme';
 import { drawSprite } from '../../sprites/render';
@@ -68,7 +68,7 @@ class EarDrag extends Skit {
         } else {
           o.face(a.x);
           o.call(1.2);
-          o.talk('BACK TO WORK!', 1.6);
+          o.talk('*CLICK* back!', 1.6);
           w.sfx('meeting', o.x, 0.45);
           a.setPose('shock', true);
           a.showIcon('bang', 0.8);
@@ -117,7 +117,7 @@ class EarDrag extends Skit {
           this.tether = false;
           a.setPose('idle');
           a.talk(r.pick(['ok ok', 'fine...', 'rude']), 1.2);
-          o.talk('good.', 1);
+          o.talk('*click*', 1);
           this.next(6);
         }
         break;

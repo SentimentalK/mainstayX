@@ -1,13 +1,13 @@
 name: Build & Publish Image
 
-# Mirrors the homelab app repos (tracking-tool, chief-everything-officer):
-# PRs build and smoke-test amd64 only; pushes to main publish a multi-arch
-# (amd64 + arm64) image to GHCR. The k3s-homelab Deployment pulls
-# ghcr.io/sentimentalk/mainstayx:latest.
+# Every push (any branch) builds, smoke-tests and publishes a multi-arch
+# (amd64 + arm64, Linux only) image to GHCR, tagged sha-<short> and <branch>.
+# Only main moves :latest, which is what the k3s-homelab Deployment pulls
+# (ghcr.io/sentimentalk/mainstayx:latest). PRs build and smoke-test amd64 only.
 
 on:
   push:
-    branches: [main]
+    branches: ['**']
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -82,7 +82,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Tags: sha-<short-sha>, latest and main (on main).
+      # Tags: sha-<short-sha> and <branch> on every push; latest only on main.
       - name: Extract Docker Metadata
         if: github.event_name != 'pull_request'
         id: meta

@@ -60,11 +60,12 @@ Production: **https://www.mainstayx.com**, on the owner's K3s homelab
 (GitOps repo [`SentimentalK/k3s-homelab`](https://github.com/SentimentalK/k3s-homelab)).
 Same flow as the other homelab apps:
 
-1. **Image.** `.github/workflows/image.yaml` builds the Dockerfile on every PR
-   (amd64, plus a smoke test: `/healthz`, every page, a hashed asset, a 404).
-   On push to `main` it publishes a multi-arch (`linux/amd64,linux/arm64`) image
-   to GHCR as `ghcr.io/sentimentalk/mainstayx:latest`, `:main` and `:sha-<short>`.
-   The cluster has no pull secret, so the GHCR package must be **public**.
+1. **Image.** `.github/workflows/image.yaml` builds the Dockerfile and smoke-tests
+   it (`/healthz`, every page, a hashed asset, a 404, relative redirects) on every
+   push and PR. Every **push** (any branch) also publishes a multi-arch
+   (`linux/amd64,linux/arm64`) image to GHCR as `:sha-<short>` and `:<branch>`;
+   only `main` moves `:latest`, which is what production runs. The cluster has no
+   pull secret, so the GHCR package must be **public**.
 2. **Manifests.** They live in the homelab repo, not here:
    `apps/mainstayx/` (namespace, Deployment, Service, Ingress) plus the ArgoCD
    Application `apps/mainstayx-app.yaml`. ArgoCD auto-syncs (prune + self-heal)

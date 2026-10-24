@@ -161,3 +161,7 @@ smoother, simpler.
   removed (restore from git history when the blog moves on-site). Projects list = public repos with a
   live homepage on the homelab, plus Echolet and the homelab itself; internal tools (tracking, n8n,
   LifeOS MCP) and the Avalon Tunnel decoy host are deliberately left off.
+- **Orca speaks "pod"**: orcas live in pods, and so do Kubernetes workloads. Orca's own lines are
+  pod calls and clicks (`pod up!` / `swim!` to start/end a meeting, `fan out!` / `all pods!` for big
+  jobs, `*CLICK* back!`, `*click*`, `*CLICK CLICK*`) instead of office talk like "standup!" and
+  "break!". The agents keep talking like developers; the whale-song duet keeps its whale song.

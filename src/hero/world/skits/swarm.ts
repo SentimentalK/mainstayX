@@ -81,7 +81,7 @@ class Swarm extends Skit {
             w.shake(1, 0.15);
           } else {
             o.call(1.2);
-            o.talk('SIT. DOWN.', 1.5);
+            o.talk('*CLICK CLICK*', 1.5);
           }
           w.sfx('meeting', l ? l.x : o.x, 0.45);
           for (const s of this.subs) {

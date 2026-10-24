@@ -182,7 +182,7 @@ export class World {
     this.dispatches++;
     this.sizes[size]++;
     this.sfx('dispatch', this.orca.x, 0.35, false, size === 'L' ? -5 : size === 'M' ? -2 : 0);
-    if (size === 'L') { this.orca.call(1); this.orca.talk(this.drng.pick(['big one!', 'all hands!', 'epic task']), 1.2); }
+    if (size === 'L') { this.orca.call(1); this.orca.talk(this.drng.pick(['fan out!', 'all pods!', '*click* big one']), 1.2); }
     this.links.send('task', this.orca, a, { sfx: 'deliver', size: job.big, onArrive: () => a.receiveTask() });
   }
 

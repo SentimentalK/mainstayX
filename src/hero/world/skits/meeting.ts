@@ -1,5 +1,5 @@
-// Meeting: Orca calls a standup; everyone drops what they're doing, runs over
-// and stands in a ring around Orca trading tiny bubbles, then "break!".
+// Meeting: Orca calls the pod together ("pod up!"); everyone drops what they're
+// doing, runs over and stands in a ring around Orca trading tiny bubbles, then "swim!".
 import type { Agent } from '../agent';
 import { SEATS, type Pt } from '../layout';
 import { Skit, type SkitDef } from '../skit';
@@ -19,7 +19,7 @@ class Meeting extends Skit {
   protected override begin(): void {
     const w = this.w, o = w.orca;
     o.call(2);
-    o.talk('standup!', 1.8);
+    o.talk('pod up!', 1.8);
     w.sfx('meeting', o.x, 0.5);
     // greedy nearest free seat
     const used = new Set<number>();
@@ -51,7 +51,7 @@ class Meeting extends Skit {
       }
       case 2:
         if ((this.lineT -= dt) <= 0) {
-          if (this.lines-- <= 0) { o.talk('break!', 1.2); o.hop(); w.sfx('blip', o.x, 0.4); this.next(); break; }
+          if (this.lines-- <= 0) { o.talk('swim!', 1.2); o.hop(); w.sfx('blip', o.x, 0.4); this.next(); break; }
           this.lineT = 0.8;
           let s = A[r.int(0, A.length - 1)];
           if (s === this.last && A.length > 1) s = A[(A.indexOf(s) + 1) % A.length];
