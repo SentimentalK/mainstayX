@@ -17,6 +17,11 @@ export const SPRITES: Record<SpriteId, SpriteDef> = {
   kimi: KIMI_DEF,
   glm: GLM_DEF,
   deepseek: DEEPSEEK,
+  // TODO(art): placeholders until the real GPT / Grok / OpenCode-mini sprites land.
+  gpt: CODEX,
+  grok: KIMI_DEF,
+  glmMini: MINI,
+  deepseekMini: MINI,
   orca: ORCA,
   packet: PACKET,
   icon: ICON,

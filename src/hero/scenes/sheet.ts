@@ -18,7 +18,7 @@ const PAGES = 7;
 const PAGE_TIME = 6;
 
 const AGENT_ROWS: CharacterId[][] = [['clawd', 'gemini', 'codex'], ['qwen', 'kimi', 'mini'], ['glm', 'deepseek']];
-const SCALE: Record<CharacterId, number> = { clawd: 2, gemini: 2, codex: 2, qwen: 2, kimi: 2, glm: 2, deepseek: 2, mini: 1, orca: 2 };
+const SCALE: Record<CharacterId, number> = { clawd: 2, gpt: 2, grok: 2, gemini: 2, codex: 2, qwen: 2, kimi: 2, glm: 2, deepseek: 2, mini: 1, glmMini: 1, deepseekMini: 1, orca: 2 };
 
 export function createSheetScene(): Scene {
   let t = 0;

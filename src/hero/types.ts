@@ -218,7 +218,16 @@ export interface SpriteDef {
  * Agents (clawd, mini, gemini, codex, qwen, kimi, glm, deepseek) provide AGENT_ANIMS.
  * orca provides ORCA_ANIMS.
  */
-export type CharacterId = 'clawd' | 'mini' | 'gemini' | 'codex' | 'qwen' | 'kimi' | 'glm' | 'deepseek' | 'orca';
+export type CharacterId =
+  | 'clawd' | 'gpt' | 'grok' | 'gemini' | 'glm' | 'deepseek'
+  // benched: kept in the code, not on stage (AgentProfile.onStage)
+  | 'codex' | 'qwen' | 'kimi'
+  // sub-agents: Claude's own minis, and the OpenCode ones everyone else summons
+  | 'mini' | 'glmMini' | 'deepseekMini'
+  | 'orca';
+
+/** The IDE / harness an agent works in. Each has its own portable workstation. */
+export type ToolId = 'claudecode' | 'codex' | 'cursor' | 'antigravity' | 'opencode';
 /** Props / icons / effects. Anim names for these are listed in PROP_ANIMS. */
 export type PropId = 'packet' | 'icon' | 'fx';
 export type SpriteId = CharacterId | PropId;
@@ -274,5 +283,11 @@ export interface AgentProfile {
   color: string;
   /** Default render scale in the world. */
   scale: number;
+  /** The only workstation this agent may sit at (null: Orca). Never sit at another tool's desk. */
+  tool: ToolId | null;
+  /** Shown in the world. Benched characters stay defined (sheet, future use). */
+  onStage: boolean;
+  /** Sub-agent ids this agent spawns for big jobs (Claude: its own minis; others: OpenCode ones). */
+  summons: CharacterId[];
   project: { title: string; blurb: string; url?: string; github?: string } | null;
 }
