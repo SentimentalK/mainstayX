@@ -29,6 +29,14 @@ export const AGENTS: Record<CharacterId, AgentProfile> = {
     id: 'kimi', name: 'KIMI', role: 'reader', color: '#e6edf3', scale: 2,
     project: null,
   },
+  glm: {
+    id: 'glm', name: 'GLM', role: 'agent', color: '#7385ff', scale: 2,
+    project: null,
+  },
+  deepseek: {
+    id: 'deepseek', name: 'DEEPSEEK', role: "orca's little cousin", color: '#4d6bfe', scale: 2,
+    project: null,
+  },
   mini: {
     id: 'mini', name: 'sub-agent', role: 'summoned helper', color: '#d97757', scale: 1,
     project: null,

@@ -3,6 +3,7 @@
 // Preview everything with ?scene=sheet.
 import type { SpriteDef, SpriteId } from '../types';
 import { CLAWD, CODEX, GEMINI, KIMI_DEF, MINI, QWEN_DEF } from './art/agents';
+import { DEEPSEEK, GLM_DEF } from './art/newcomers';
 import { ORCA } from './art/orca';
 import { EFFECTS, ICON, PACKET } from './art/props';
 import { validate } from './art/util';
@@ -14,6 +15,8 @@ export const SPRITES: Record<SpriteId, SpriteDef> = {
   codex: CODEX,
   qwen: QWEN_DEF,
   kimi: KIMI_DEF,
+  glm: GLM_DEF,
+  deepseek: DEEPSEEK,
   orca: ORCA,
   packet: PACKET,
   icon: ICON,
