@@ -8,15 +8,6 @@ import type { Text } from './text';
 import { rgba } from './draw';
 import { createRng } from './rng';
 
-const SEEN_KEY = 'mx.seenIntro';
-
-export function storageGet(key: string): string | null {
-  try { return localStorage.getItem(key); } catch { return null; }
-}
-export function storageSet(key: string, value: string | null): void {
-  try { value === null ? localStorage.removeItem(key) : localStorage.setItem(key, value); } catch { /* private mode */ }
-}
-
 export interface Hud {
   skip: HTMLButtonElement;
   replay: HTMLButtonElement;
@@ -91,13 +82,14 @@ export class Director {
 
   start(): void {
     const p = this.params;
-    const seen = storageGet(SEEN_KEY) === '1';
     let first: SceneId;
     if (p.scene === 'door') first = 'intro';
     else if (p.scene === 'warp') first = 'warp';
     else if (p.scene === 'world') first = 'world';
     else if (p.scene === 'sheet') first = 'sheet';
-    else first = seen || this.reducedMotion ? 'world' : 'intro';
+    // Every visit knocks on the door (the world behind it is different each time);
+    // only reduced motion goes straight in.
+    else first = this.reducedMotion ? 'world' : 'intro';
     this.switchTo(first);
     this.running = true;
     this.last = performance.now();
@@ -119,7 +111,6 @@ export class Director {
   private setPhase(p: Phase): void {
     if (p === this.phase && this.sceneId !== 'intro') return;
     this.phase = p;
-    if (p === 'WORLD' && this.params.scene === null) storageSet(SEEN_KEY, '1');
     document.documentElement.dataset.phase = p;
     if (this.params.debug) console.debug('[mx] phase', p);
     this.updateHud();
@@ -134,7 +125,6 @@ export class Director {
   }
 
   replay(): void {
-    storageSet(SEEN_KEY, null);
     this.audio.music(false);
     this.ctx.flash('#000000', 0.4);
     this.pending = 'intro';

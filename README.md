@@ -30,9 +30,9 @@ URL parameters (handy while developing):
 | `?speed=4` | run the simulation faster (debug) |
 | `?debug=1` | fps / phase overlay |
 
-First visit plays the full intro; afterwards (localStorage `mx.seenIntro`)
-the page opens straight into the world with a `↺ replay intro` button.
-`skip ▸` / `Esc` skips the intro, the `♪` button / `M` toggles sound (stored
+Every visit plays the intro (knock, Clawd says hi, warp); the world behind the
+door opens on a different random moment each time. `skip ▸` / `Esc` skips the
+intro, `↺ replay intro` replays it from the world, the `♪` button / `M` toggles sound (stored
 in `mx.muted`). `prefers-reduced-motion` goes straight to the world with
 gentler animation.
 

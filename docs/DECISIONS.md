@@ -165,3 +165,7 @@ smoother, simpler.
   pod calls and clicks (`pod up!` / `swim!` to start/end a meeting, `fan out!` / `all pods!` for big
   jobs, `*CLICK* back!`, `*click*`, `*CLICK CLICK*`) instead of office talk like "standup!" and
   "break!". The agents keep talking like developers; the whale-song duet keeps its whale song.
+- **Every visit knocks.** The "seen the intro → open straight in the world" shortcut
+  (localStorage `mx.seenIntro`) was removed: the door is the point, and the world behind it
+  is different every time anyway. `skip ▸` / `Esc` still skip; reduced motion still goes
+  straight to the world.

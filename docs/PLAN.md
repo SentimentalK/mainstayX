@@ -35,7 +35,7 @@ Scene ids: `intro` (DOOR/KNOCK/OPEN/GREET), `warp` (WARP), `world` (WORLD),
 `?speed=n` (debug time multiplier), `?debug=1`.
 
 Director owns: the loop, scene switching, phase → `<html data-phase>`,
-localStorage `mx.seenIntro` (set on reaching WORLD), skip (`skip ▸`, Esc),
+skip (`skip ▸`, Esc),
 replay (`↺ replay intro`), mute button (M), pausing on hidden tab, unlocking
 audio on the first user gesture anywhere.
 

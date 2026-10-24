@@ -93,7 +93,7 @@ try {
     await ctx.close();
   }
 
-  // 3. Full first visit: audio starts only after the click; full flow; revisit skips intro.
+  // 3. Full first visit: audio starts only after the click; full flow; a revisit knocks again.
   {
     const { ctx, page, errors } = await open('?seed=7', { countAudio: true });
     await simWait(page, 0.5);
@@ -109,7 +109,6 @@ try {
     await shot(page, 'greet');
     await page.waitForFunction(() => window.__mx.debug().phase === 'WORLD', null, { timeout: 90_000 });
     check('full flow reaches WORLD', true);
-    check('seen flag stored', (await page.evaluate(() => localStorage.getItem('mx.seenIntro'))) === '1');
     // mute
     await page.locator('button.mute').click();
     d = await dbg(page);
@@ -121,18 +120,17 @@ try {
     await page.reload();
     await page.waitForFunction(() => window.__mx?.debug?.().frames > 2);
     d = await dbg(page);
-    check('revisit lands in WORLD', d.phase === 'WORLD', d.phase);
-    check('replay button visible on revisit', await page.locator('button.replay').isVisible());
-    check('skip button hidden in world', !(await page.locator('button.skip').isVisible()));
-    await page.locator('button.replay').click();
-    await simWait(page, 0.3);
-    d = await dbg(page);
-    check('replay goes back to DOOR', d.phase === 'DOOR', d.phase);
+    check('revisit knocks on the door again', d.phase === 'DOOR', d.phase);
     check('skip button visible during intro', await page.locator('button.skip').isVisible());
     await page.keyboard.press('Escape');
     await simWait(page, 0.3);
     d = await dbg(page);
     check('Esc skips to WORLD', d.phase === 'WORLD', d.phase);
+    check('skip button hidden in world', !(await page.locator('button.skip').isVisible()));
+    await page.locator('button.replay').click();
+    await simWait(page, 0.3);
+    d = await dbg(page);
+    check('replay goes back to DOOR', d.phase === 'DOOR', d.phase);
     check('flow: no console errors', errors.length === 0, errors);
     await ctx.close();
   }
