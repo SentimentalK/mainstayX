@@ -75,18 +75,32 @@ export function randomSpot(rng: Rng, cx: number, cy: number, r: number, halfW: n
 }
 
 /**
- * Where each agent hangs out (feet). Spread around Orca like the reference:
- * three on each flank, DeepSeek front and centre below its big cousin.
+ * Where each agent hangs out (feet). Two per flank and two in front, DeepSeek
+ * front and centre below its big cousin. Benched characters keep a spot for
+ * when they come back.
  */
 export const HOMES: Partial<Record<CharacterId, Pt>> = {
-  clawd: { x: 60, y: 100 },
-  glm: { x: 34, y: 140 },
-  gemini: { x: 96, y: 156 },
-  deepseek: { x: 160, y: 162 },
+  clawd: { x: 58, y: 102 },
+  glm: { x: 40, y: 146 },
+  gemini: { x: 106, y: 158 },
+  deepseek: { x: 172, y: 164 },
+  gpt: { x: 248, y: 150 },
+  grok: { x: 268, y: 106 },
+  // benched
   codex: { x: 230, y: 152 },
   qwen: { x: 284, y: 128 },
   kimi: { x: 214, y: 90 },
 };
+
+/**
+ * Orca's on-screen footprint (sprite, floor rings and its label). Workstations
+ * must not cover any of it; agents' feet are kept out by KEEP instead.
+ */
+export const ORCA_VIS = { x: 120, y: 72, w: 80, h: 56 } as const;
+
+export function rectsOverlap(ax: number, ay: number, aw: number, ah: number, bx: number, by: number, bw: number, bh: number): boolean {
+  return ax < bx + bw && bx < ax + aw && ay < by + bh && by < ay + ah;
+}
 
 /** Meeting seats around Orca (feet positions), all outside KEEP. One per main agent. */
 export const SEATS: readonly Pt[] = [

@@ -17,6 +17,7 @@ export class Scheduler {
   private time = 0;
   /** Recent starts, newest last (bounded). */
   readonly log: string[] = [];
+  get names(): string[] { return this.defs.map(d => d.name); }
   private pool: SkitDef[] = [];
 
   constructor(private defs: readonly SkitDef[], private rng: Rng) {
