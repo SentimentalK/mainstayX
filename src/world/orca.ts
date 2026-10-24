@@ -47,8 +47,9 @@ export class Orca implements Anchor {
   /** Face toward an x position (sprites face right; flip = face left). */
   face(x: number): void { if (Math.abs(x - this.x) > 4) this.flip = x < this.x; }
 
-  blow(): void {
-    if (this.hold > 0) return;
+  /** force: restart the spout even mid-animation (skits that need it on cue). */
+  blow(force = false): void {
+    if (this.hold > 0 && !force) return;
     this.setAnim('blow', 1.3);
     this.sfx('spout', this.x, 0.45);
   }

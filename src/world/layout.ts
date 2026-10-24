@@ -74,16 +74,22 @@ export function randomSpot(rng: Rng, cx: number, cy: number, r: number, halfW: n
   return out;
 }
 
-/** Where each agent hangs out (feet). Spread around Orca like the reference. */
+/**
+ * Where each agent hangs out (feet). Spread around Orca like the reference:
+ * three on each flank, DeepSeek front and centre below its big cousin.
+ */
 export const HOMES: Partial<Record<CharacterId, Pt>> = {
   clawd: { x: 60, y: 100 },
-  gemini: { x: 86, y: 152 },
-  codex: { x: 238, y: 156 },
-  qwen: { x: 278, y: 116 },
-  kimi: { x: 210, y: 90 },
+  glm: { x: 34, y: 140 },
+  gemini: { x: 96, y: 156 },
+  deepseek: { x: 160, y: 162 },
+  codex: { x: 230, y: 152 },
+  qwen: { x: 284, y: 128 },
+  kimi: { x: 214, y: 90 },
 };
 
-/** Meeting seats around Orca (feet positions), all outside KEEP. */
+/** Meeting seats around Orca (feet positions), all outside KEEP. One per main agent. */
 export const SEATS: readonly Pt[] = [
-  { x: 98, y: 108 }, { x: 222, y: 108 }, { x: 120, y: 136 }, { x: 200, y: 136 }, { x: 160, y: 142 },
+  { x: 92, y: 112 }, { x: 228, y: 112 }, { x: 120, y: 138 }, { x: 200, y: 138 }, { x: 160, y: 146 },
+  { x: 108, y: 90 }, { x: 212, y: 90 },
 ];

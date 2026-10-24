@@ -13,8 +13,9 @@ import { review } from './review';
 import { ctxOverflow } from './ctx';
 import { coffee } from './coffee';
 import { tug } from './tug';
+import { whaleSong } from './whale';
 
 export const SKITS: readonly SkitDef[] = [
   lost, drop, collision, summon, meeting, relay, celebrate, nap,
-  bug, review, ctxOverflow, coffee, tug,
+  bug, review, ctxOverflow, coffee, tug, whaleSong,
 ];
