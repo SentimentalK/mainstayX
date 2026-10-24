@@ -58,19 +58,34 @@ paths and answers `/healthz`.
 
 ## Deploy (k3s)
 
-Example manifests live in `deploy/k8s/` (Deployment, Service, Ingress,
-kustomization). Lines marked `CHANGE ME` need your values:
+Production: **https://www.mainstayx.com**, on the owner's K3s homelab
+(GitOps repo [`SentimentalK/k3s-homelab`](https://github.com/SentimentalK/k3s-homelab)).
+Same flow as the other homelab apps:
 
-- image registry/name/tag (`kustomization.yaml` → `images`, or `deployment.yaml`)
-- namespace (`kustomization.yaml`)
-- host name and TLS secret / cert-manager issuer (`ingress.yaml`); the ingress
-  class defaults to k3s' built-in `traefik`
+1. **Image.** `.github/workflows/image.yaml` builds the Dockerfile on every PR
+   (amd64, plus a smoke test: `/healthz`, every page, a hashed asset, a 404).
+   On push to `main` it publishes a multi-arch (`linux/amd64,linux/arm64`) image
+   to GHCR as `ghcr.io/sentimentalk/mainstayx:latest`, `:main` and `:sha-<short>`.
+   The cluster has no pull secret, so the GHCR package must be **public**.
+2. **Manifests.** They live in the homelab repo, not here:
+   `apps/mainstayx/` (namespace, Deployment, Service, Ingress) plus the ArgoCD
+   Application `apps/mainstayx-app.yaml`. ArgoCD auto-syncs (prune + self-heal)
+   from that repo's `master` branch.
+3. **Ingress/TLS.** Traefik (`ingressClassName: traefik`) routes
+   `www.mainstayx.com` to the Service on 8080; cert-manager's `letsencrypt-prod`
+   ClusterIssuer (HTTP-01) issues the `mainstayx-tls` certificate.
+4. **Rollout.** The Deployment tracks `:latest` with `imagePullPolicy: Always`
+   and there is no image updater, so a new image goes live on the next pod
+   restart:
 
 ```sh
-docker build -t REGISTRY/mainstayx:TAG . && docker push REGISTRY/mainstayx:TAG
-kubectl create namespace mainstayx
-kubectl apply -k deploy/k8s
+kubectl -n mainstayx rollout restart deployment/mainstayx
 ```
+
+The pod is pinned to the arm64 node `mtl0` (like `ceo-web`), runs as uid 101
+with a read-only root filesystem, and mounts in-memory `emptyDir`s at `/tmp`
+(nginx pid) and `/var/cache/nginx`. The bare `mainstayx.com` is not routed: the
+homelab has no apex→www redirect yet (see `docs/DECISIONS.md`).
 
 ## Layout
 
@@ -94,7 +109,7 @@ src/
     data/            agent profiles (projects/links), palette
 design/              approved static style reference + the original build brief
 docs/                PLAN.md (architecture), DECISIONS.md (judgement calls)
-deploy/k8s/          example manifests
+.github/workflows/   image.yaml: build, smoke-test, publish multi-arch image to GHCR
 ```
 
 The hero pauses (loop and music) whenever it's scrolled out of view or the tab

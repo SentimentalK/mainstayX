@@ -71,6 +71,21 @@ smoother, simpler.
 - Image listens on **8080 as the unprivileged `nginx` user** (k8s `runAsNonRoot`), serves
   `/healthz` for probes. Base `nginx:stable-alpine`.
 - Ingress defaults to `ingressClassName: traefik` (k3s' built-in controller).
+- **Deployed the homelab way, copying `ceo-web`** (the other nginx static site on 8080 with
+  `/healthz`). The manifests live in `k3s-homelab/apps/mainstayx/` and the ArgoCD Application
+  in `apps/mainstayx-app.yaml`; ArgoCD auto-syncs them. The placeholder `deploy/k8s/` here was
+  deleted so there aren't two copies to drift apart. CI publishes multi-arch
+  `ghcr.io/sentimentalk/mainstayx:latest` (the nodes are a mix of arm64 and amd64), and the
+  Deployment uses `imagePullPolicy: Always` with no image updater, so a release goes live on
+  `rollout restart`, as it does for the other apps. Pinned to `arm64`/`mtl0` like `ceo-web`.
+- The pod sets `runAsUser: 101` explicitly: `runAsNonRoot` refuses an image whose `USER` is the
+  name `nginx` because it can't prove the user isn't root. It also has a read-only root
+  filesystem with in-memory `emptyDir`s for `/tmp` (pid) and `/var/cache/nginx`. The Dockerfile
+  is unchanged.
+- **No apex redirect yet.** No homelab app redirects between hosts (no Traefik `Middleware`
+  anywhere), so only `www.mainstayx.com` is routed. To add `mainstayx.com` → `www`, either use a
+  redirect rule at the DNS provider or add a Traefik `redirectRegex` Middleware plus a second
+  host on the Ingress.
 
 ## Site shell (Astro)
 - The landing page grew into a site (projects, blog, about), so the app moved to **Astro with
