@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: mainstayx   # CHANGE ME (create it first: kubectl create namespace mainstayx)
+resources:
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+images:
+  - name: REGISTRY.EXAMPLE.COM/mainstayx   # CHANGE ME: set newName/newTag here instead of editing deployment.yaml
+    newTag: latest

@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mainstayx
+  labels: { app: mainstayx }
+spec:
+  selector: { app: mainstayx }
+  ports:
+    - { name: http, port: 80, targetPort: http }
