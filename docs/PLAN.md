@@ -17,7 +17,7 @@ chiptune. Spec: `design/CLOUD_PROMPT.md`. Visual reference: `design/synthwave/`.
 | **Audio** | `src/hero/audio/**` | audio agent |
 | **World** | `src/hero/scenes/world.ts`, `src/hero/world/**` | world agent |
 | **Intro** | `src/hero/scenes/intro.ts`, `src/hero/scenes/warp.ts`, `src/hero/scenes/intro/**` | intro agent |
-| Deploy | `Dockerfile`, `nginx.conf`, `deploy/k8s/*`, `README.md` | lead |
+| Deploy | `Dockerfile`, `nginx.conf`, `.github/workflows/image.yaml`, `README.md` (manifests live in k3s-homelab `apps/mainstayx/`) | lead |
 
 Nobody edits files they don't own. Contract changes go through the lead.
 

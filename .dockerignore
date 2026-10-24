@@ -4,5 +4,6 @@ dist
 screenshots
 design
 docs
-deploy
+.github
+.claude
 *.log
