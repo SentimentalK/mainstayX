@@ -1,28 +1,38 @@
 // Debug sprite sheet (?scene=sheet). Shows every sprite and every animation
 // playing, at world scale. Pages cycle every 6 s; `?page=n` pins one page.
-//   0  clawd / gemini / codex      1  qwen / kimi / mini
-//   2  glm / deepseek              3  orca, packets, fx
-//   4  icons + a walking parade    5  static frame strips (walk / idle / back cycles, orca swim)
-//   6  static frame strips for glm / deepseek (+ next to orca for scale)
-import type { CharacterId, Gfx, Scene, SceneContext, SpriteId } from '../types';
+//   0  clawd / gpt / grok              1  gemini / glm / deepseek
+//   2  sub-agents: mini / glmMini / deepseekMini (1x, shown 2x)
+//   3  benched: codex / qwen / kimi    4  the five workstations: unfold loop, busy, unfold film strip
+//   5  workstations with four agents around them (scale check)
+//   6  orca, packets, fx               7  icons + a walking parade
+//   8  static frame strips (walk / idle / back) for the cast + minis
+//   9  frame strips for deepseek + the benched, and a line-up next to orca
+// `?t=seconds` starts the clock there (headless screenshots don't advance it);
+// `?u=0..1` pins the unfold of page 4's top row.
+import type { CharacterId, Gfx, Scene, SceneContext, SpriteId, ToolId } from '../types';
 import { AGENT_ANIMS, ORCA_ANIMS, PROP_ANIMS, W, H } from '../types';
 import { drawSprite, frameAt, frameCount, spriteSize } from '../sprites/render';
 import { SPRITES } from '../sprites/defs';
+import { PLATE_READY, STATION, STATION_LOOK, drawPocketCube, drawStation, platePos } from '../sprites/art/stations';
 
 const BG = '#0d0221';
 const LINE = '#2a0a3f';
 const LABEL = '#ffe6f7';
 const DIM = '#a58bbf';
 const TITLE = '#ff4fd8';
-const PAGES = 7;
+const PAGES = 10;
 const PAGE_TIME = 6;
 
-const AGENT_ROWS: CharacterId[][] = [['clawd', 'gemini', 'codex'], ['qwen', 'kimi', 'mini'], ['glm', 'deepseek']];
+const AGENT_ROWS: CharacterId[][] = [['clawd', 'gpt', 'grok'], ['gemini', 'glm', 'deepseek'], ['mini', 'glmMini', 'deepseekMini'], ['codex', 'qwen', 'kimi']];
+const BENCHED = new Set<CharacterId>(['codex', 'qwen', 'kimi']);
+const TOOLS: ToolId[] = ['claudecode', 'codex', 'cursor', 'antigravity', 'opencode'];
+const STATION_RIM = '#5a1680';
 const SCALE: Record<CharacterId, number> = { clawd: 2, gpt: 2, grok: 2, gemini: 2, codex: 2, qwen: 2, kimi: 2, glm: 2, deepseek: 2, mini: 1, glmMini: 1, deepseekMini: 1, orca: 2 };
 
 export function createSheetScene(): Scene {
   let t = 0;
   let pinned: number | null = null;
+  let pinU: number | null = null;
 
   /** Playback time for an anim; non-looping ones restart every `period` s. */
   const at = (id: SpriteId, anim: string, period = 2): number => {
@@ -46,9 +56,78 @@ export function createSheetScene(): Scene {
       const y0 = 12 + r * 56;
       const s = SCALE[id];
       const sz = spriteSize(id, 'idle', 1);
-      g.text.draw(`${id}  ${sz.w}x${sz.h} @${s}x`, 6, y0 + 1, { size: 4, color: TITLE, align: 'left' });
-      AGENT_ANIMS.forEach((anim, i) => cell(g, id, anim, 20 + i * 28, y0 + 34, s));
+      const bench = BENCHED.has(id);
+      // 1x sub-agents are shown at 2x so the pixels can be checked; a true-size copy sits by the title
+      const show = s === 1 ? 2 : s;
+      const note = bench ? '  BENCHED (kept, off stage)' : s === 1 ? '  (shown 2x)' : '';
+      g.text.draw(`${id}  ${sz.w}x${sz.h} @${s}x${note}`, 6, y0 + 1, { size: 4, color: bench ? DIM : TITLE, align: 'left' });
+      if (s === 1) drawSprite(g.ctx, id, 'idle', at(id, 'idle'), 160, y0 + 4);
+      AGENT_ANIMS.forEach((anim, i) => cell(g, id, anim, 20 + i * 28, y0 + 34, show));
     });
+  }
+
+  /** Unfold 0 -> 1, hold (busy), 1 -> 0, hold. */
+  function unfoldAt(time: number): { u: number; busy: boolean } {
+    const k = time % 6;
+    if (k < 1.8) return { u: k / 1.8, busy: false };
+    if (k < 3.6) return { u: 1, busy: k > 2.1 };
+    if (k < 5.2) return { u: 1 - (k - 3.6) / 1.6, busy: false };
+    return { u: 0, busy: false };
+  }
+
+  function station(g: Gfx, tool: ToolId, cx: number, by: number, u: number, busy: boolean): void {
+    drawStation(g.ctx, tool, cx, by, { unfold: u, t, busy });
+    if (u >= PLATE_READY) {
+      const p = platePos(tool, cx, by);
+      g.text.draw(STATION_LOOK[tool].label, p.x, p.y, { size: 4, color: STATION_LOOK[tool].trim, shadow: null });
+    }
+  }
+
+  function floorLine(g: Gfx, by: number): void {
+    g.ctx.fillStyle = LINE;
+    g.ctx.fillRect(0, by, W, 1);
+  }
+
+  function stationsPage(g: Gfx): void {
+    const c = g.ctx;
+    const loop = unfoldAt(t);
+    const u = pinU ?? loop.u;
+    g.text.draw(`stations ${STATION.w}x${STATION.h}  unfold ${u.toFixed(2)}${pinU === null ? '  (?u= pins)' : ''}`, 6, 5, { size: 4, color: TITLE, align: 'left' });
+    floorLine(g, 52);
+    TOOLS.forEach((tool, i) => station(g, tool, 32 + i * 64, 52, u, pinU === null ? loop.busy : false));
+    g.text.draw('busy', 6, 62, { size: 4, color: TITLE, align: 'left' });
+    floorLine(g, 108);
+    TOOLS.forEach((tool, i) => station(g, tool, 32 + i * 64, 108, 1, true));
+    const tool = TOOLS[Math.floor(t / 1.5) % TOOLS.length];
+    g.text.draw(`unfold film strip: ${tool}  (pocket case, then u = .15 .25 .42 .62 .8 .93)`, 6, 117, { size: 3.5, color: DIM, align: 'left', shadow: null });
+    floorLine(g, 170);
+    drawPocketCube(c, tool, 6, 160, t);
+    [0.15, 0.25, 0.42, 0.62, 0.8, 0.93].forEach((fu, i) => station(g, tool, 28 + i * 53, 170, fu, false));
+  }
+
+  /** Four agents around a desk: two at the ends on the floor, two behind it. */
+  function seatsPage(g: Gfx): void {
+    const c = g.ctx;
+    g.text.draw('a desk seats 4. suggested: two at the ends on the floor (cx +- 38), two at cx +- 17:', 6, 5, { size: 3.5, color: TITLE, align: 'left', shadow: null });
+    g.text.draw('2x agents stand behind it at by-6 (drawn first), 1x sub-agents hop onto the desk top at by-14', 6, 10, { size: 3.5, color: TITLE, align: 'left', shadow: null });
+    const seat = (id: CharacterId, x: number, by: number, flip: boolean) =>
+      drawSprite(c, id, 'work', at(id, 'work'), x, by, { scale: SCALE[id], outline: STATION_RIM, flip });
+    const scene = (tool: ToolId, cx: number, by: number, back: [CharacterId, CharacterId], ends: [CharacterId, CharacterId]) => {
+      floorLine(g, by);
+      const mini = (id: CharacterId) => SCALE[id] === 1;
+      // behind the desk first, so the desk hides their legs
+      if (!mini(back[0])) seat(back[0], cx - 17, by - 6, false);
+      if (!mini(back[1])) seat(back[1], cx + 17, by - 6, true);
+      station(g, tool, cx, by, 1, true);
+      if (mini(back[0])) seat(back[0], cx - 17, by - 14, false);
+      if (mini(back[1])) seat(back[1], cx + 17, by - 14, true);
+      seat(ends[0], cx - STATION.w / 2 - 12, by, false);
+      seat(ends[1], cx + STATION.w / 2 + 12, by, true);
+    };
+    scene('opencode', 80, 82, ['glmMini', 'deepseekMini'], ['glm', 'deepseek']);
+    scene('claudecode', 240, 82, ['mini', 'mini'], ['clawd', 'mini']);
+    scene('codex', 80, 164, ['gpt', 'gpt'], ['gpt', 'gpt']);
+    scene('cursor', 240, 164, ['grok', 'grok'], ['grok', 'grok']);
   }
 
   function propsPage(g: Gfx): void {
@@ -93,9 +172,9 @@ export function createSheetScene(): Scene {
     c.fillRect(0, floor, W, 1);
     const ox = ((t * 30) % (W + 60)) - 30;
     drawSprite(c, 'orca', 'swim', at('orca', 'swim'), Math.round(W - ox), 132, { scale: 2, outline: '#7a4fb0', flip: true });
-    const walkers: CharacterId[] = ['clawd', 'mini', 'gemini', 'codex', 'qwen', 'kimi', 'glm', 'deepseek'];
+    const walkers: CharacterId[] = ['clawd', 'mini', 'gpt', 'glmMini', 'grok', 'gemini', 'deepseekMini', 'glm', 'deepseek'];
     walkers.forEach((id, i) => {
-      const x = (((t * 24 + i * 45) % (W + 40)) + W + 40) % (W + 40) - 20;
+      const x = (((t * 24 + i * 40) % (W + 40)) + W + 40) % (W + 40) - 20;
       drawSprite(c, id, 'walk', at(id, 'walk'), Math.round(x), floor, { scale: SCALE[id] });
     });
     // Clawd walking "into the screen".
@@ -111,27 +190,27 @@ export function createSheetScene(): Scene {
   }
 
   function framesPage(g: Gfx): void {
-    stripRows(g, ['clawd', 'gemini', 'codex', 'qwen', 'kimi']);
+    stripRows(g, ['clawd', 'gpt', 'grok', 'gemini', 'glm']);
     const by = 172;
-    g.text.draw('mini', 4, by - 6, { size: 3.5, color: TITLE, align: 'left', shadow: null });
-    let x = 22;
-    x = strip(g, 'mini', 'walk', x, by - 4, 1, 12);
-    x = strip(g, 'mini', 'idle', x, by - 4, 1, 12);
-    x = strip(g, 'mini', 'back', x, by - 4, 1, 12);
-    strip(g, 'orca', 'swim', x + 12, by - 4, 1, 34);
+    let x = 4;
+    for (const id of ['mini', 'glmMini', 'deepseekMini'] as CharacterId[]) {
+      g.text.draw(id, x, by - 20, { size: 3.5, color: TITLE, align: 'left', shadow: null });
+      x = strip(g, id, 'walk', x + 6, by - 4, 1, 13);
+      x = strip(g, id, 'idle', x - 2, by - 4, 1, 13) + 2;
+    }
   }
 
-  /** The newcomers' cycles, plus everyone at world scale next to Orca to compare sizes. */
+  /** The rest of the cycles, plus the on-stage cast at world scale next to Orca to compare sizes. */
   function framesPage2(g: Gfx): void {
-    stripRows(g, ['glm', 'deepseek']);
-    g.text.draw('line-up @2x (world scale)', 6, 92, { size: 4, color: TITLE, align: 'left' });
-    const c = g.ctx, floor = 160;
+    stripRows(g, ['deepseek', 'codex', 'qwen', 'kimi']);
+    g.text.draw('on stage @2x (world scale), sub-agents @1x', 6, 126, { size: 4, color: TITLE, align: 'left' });
+    const c = g.ctx, floor = 170;
     c.fillStyle = LINE;
     c.fillRect(0, floor, W, 1);
     drawSprite(c, 'orca', 'swim', at('orca', 'swim'), 160, floor - 6, { scale: 2, outline: '#7a4fb0' });
-    const ids: CharacterId[] = ['clawd', 'gemini', 'codex', 'glm', 'deepseek', 'qwen', 'kimi'];
-    const xs = [20, 52, 84, 230, 112, 266, 298];
-    ids.forEach((id, i) => drawSprite(c, id, 'idle', at(id, 'idle'), xs[i], floor, { scale: 2 }));
+    const ids: CharacterId[] = ['clawd', 'gpt', 'grok', 'mini', 'glmMini', 'deepseekMini', 'gemini', 'glm', 'deepseek'];
+    const xs = [18, 46, 74, 100, 114, 205, 238, 268, 298];
+    ids.forEach((id, i) => drawSprite(c, id, 'idle', at(id, 'idle'), xs[i], floor, { scale: SCALE[id] }));
   }
 
   function stripRows(g: Gfx, ids: CharacterId[]): void {
@@ -147,9 +226,16 @@ export function createSheetScene(): Scene {
 
   return {
     enter(_c: SceneContext) {
-      t = 0;
-      const p = new URLSearchParams(location.search).get('page');
-      pinned = p !== null && p !== '' && !Number.isNaN(Number(p)) ? Math.max(0, Math.min(PAGES - 1, Math.floor(Number(p)))) : null;
+      const q = new URLSearchParams(location.search);
+      const num = (k: string): number | null => {
+        const v = q.get(k);
+        return v !== null && v !== '' && !Number.isNaN(Number(v)) ? Number(v) : null;
+      };
+      const p = num('page');
+      pinned = p !== null ? Math.max(0, Math.min(PAGES - 1, Math.floor(p))) : null;
+      t = Math.max(0, num('t') ?? 0);
+      const u = num('u');
+      pinU = u !== null ? Math.max(0, Math.min(1, u)) : null;
     },
     update(dt) { t += dt; },
     render(g: Gfx) {
@@ -157,10 +243,12 @@ export function createSheetScene(): Scene {
       c.fillStyle = BG;
       c.fillRect(0, 0, W, H);
       const page = pinned ?? Math.floor(t / PAGE_TIME) % PAGES;
-      if (page <= 2) agentsPage(g, AGENT_ROWS[page]);
-      else if (page === 3) propsPage(g);
-      else if (page === 4) iconsPage(g);
-      else if (page === 5) framesPage(g);
+      if (page <= 3) agentsPage(g, AGENT_ROWS[page]);
+      else if (page === 4) stationsPage(g);
+      else if (page === 5) seatsPage(g);
+      else if (page === 6) propsPage(g);
+      else if (page === 7) iconsPage(g);
+      else if (page === 8) framesPage(g);
       else framesPage2(g);
       g.text.draw(`sheet ${page + 1}/${PAGES}${pinned === null ? '  (?page=n to pin)' : ''}`, W - 4, H - 4, {
         size: 3.5, color: DIM, align: 'right', shadow: null,
