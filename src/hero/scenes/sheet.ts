@@ -1,8 +1,9 @@
 // Debug sprite sheet (?scene=sheet). Shows every sprite and every animation
 // playing, at world scale. Pages cycle every 6 s; `?page=n` pins one page.
 //   0  clawd / gemini / codex      1  qwen / kimi / mini
-//   2  orca, packets, fx           3  icons + a walking parade
-//   4  static frame strips (walk / idle / back cycles, orca swim)
+//   2  glm / deepseek              3  orca, packets, fx
+//   4  icons + a walking parade    5  static frame strips (walk / idle / back cycles, orca swim)
+//   6  static frame strips for glm / deepseek (+ next to orca for scale)
 import type { CharacterId, Gfx, Scene, SceneContext, SpriteId } from '../types';
 import { AGENT_ANIMS, ORCA_ANIMS, PROP_ANIMS, W, H } from '../types';
 import { drawSprite, frameAt, frameCount, spriteSize } from '../sprites/render';
@@ -13,11 +14,11 @@ const LINE = '#2a0a3f';
 const LABEL = '#ffe6f7';
 const DIM = '#a58bbf';
 const TITLE = '#ff4fd8';
-const PAGES = 5;
+const PAGES = 7;
 const PAGE_TIME = 6;
 
-const AGENT_ROWS: CharacterId[][] = [['clawd', 'gemini', 'codex'], ['qwen', 'kimi', 'mini']];
-const SCALE: Record<CharacterId, number> = { clawd: 2, gemini: 2, codex: 2, qwen: 2, kimi: 2, mini: 1, orca: 2 };
+const AGENT_ROWS: CharacterId[][] = [['clawd', 'gemini', 'codex'], ['qwen', 'kimi', 'mini'], ['glm', 'deepseek']];
+const SCALE: Record<CharacterId, number> = { clawd: 2, gemini: 2, codex: 2, qwen: 2, kimi: 2, glm: 2, deepseek: 2, mini: 1, orca: 2 };
 
 export function createSheetScene(): Scene {
   let t = 0;
@@ -92,9 +93,9 @@ export function createSheetScene(): Scene {
     c.fillRect(0, floor, W, 1);
     const ox = ((t * 30) % (W + 60)) - 30;
     drawSprite(c, 'orca', 'swim', at('orca', 'swim'), Math.round(W - ox), 132, { scale: 2, outline: '#7a4fb0', flip: true });
-    const walkers: CharacterId[] = ['clawd', 'mini', 'gemini', 'codex', 'qwen', 'kimi'];
+    const walkers: CharacterId[] = ['clawd', 'mini', 'gemini', 'codex', 'qwen', 'kimi', 'glm', 'deepseek'];
     walkers.forEach((id, i) => {
-      const x = (((t * 24 + i * 56) % (W + 40)) + W + 40) % (W + 40) - 20;
+      const x = (((t * 24 + i * 45) % (W + 40)) + W + 40) % (W + 40) - 20;
       drawSprite(c, id, 'walk', at(id, 'walk'), Math.round(x), floor, { scale: SCALE[id] });
     });
     // Clawd walking "into the screen".
@@ -110,7 +111,30 @@ export function createSheetScene(): Scene {
   }
 
   function framesPage(g: Gfx): void {
-    const ids: CharacterId[] = ['clawd', 'gemini', 'codex', 'qwen', 'kimi'];
+    stripRows(g, ['clawd', 'gemini', 'codex', 'qwen', 'kimi']);
+    const by = 172;
+    g.text.draw('mini', 4, by - 6, { size: 3.5, color: TITLE, align: 'left', shadow: null });
+    let x = 22;
+    x = strip(g, 'mini', 'walk', x, by - 4, 1, 12);
+    x = strip(g, 'mini', 'idle', x, by - 4, 1, 12);
+    x = strip(g, 'mini', 'back', x, by - 4, 1, 12);
+    strip(g, 'orca', 'swim', x + 12, by - 4, 1, 34);
+  }
+
+  /** The newcomers' cycles, plus everyone at world scale next to Orca to compare sizes. */
+  function framesPage2(g: Gfx): void {
+    stripRows(g, ['glm', 'deepseek']);
+    g.text.draw('line-up @2x (world scale)', 6, 92, { size: 4, color: TITLE, align: 'left' });
+    const c = g.ctx, floor = 160;
+    c.fillStyle = LINE;
+    c.fillRect(0, floor, W, 1);
+    drawSprite(c, 'orca', 'swim', at('orca', 'swim'), 160, floor - 6, { scale: 2, outline: '#7a4fb0' });
+    const ids: CharacterId[] = ['clawd', 'gemini', 'codex', 'glm', 'deepseek', 'qwen', 'kimi'];
+    const xs = [20, 52, 84, 230, 112, 266, 298];
+    ids.forEach((id, i) => drawSprite(c, id, 'idle', at(id, 'idle'), xs[i], floor, { scale: 2 }));
+  }
+
+  function stripRows(g: Gfx, ids: CharacterId[]): void {
     ids.forEach((id, r) => {
       const by = 30 + r * 28;
       g.text.draw(id, 4, by - 8, { size: 3.5, color: TITLE, align: 'left', shadow: null });
@@ -119,13 +143,6 @@ export function createSheetScene(): Scene {
       x = strip(g, id, 'idle', x - 3, by, 2, 27);
       strip(g, id, 'back', x - 3, by, 2, 27);
     });
-    const by = 172;
-    g.text.draw('mini', 4, by - 6, { size: 3.5, color: TITLE, align: 'left', shadow: null });
-    let x = 22;
-    x = strip(g, 'mini', 'walk', x, by - 4, 1, 12);
-    x = strip(g, 'mini', 'idle', x, by - 4, 1, 12);
-    x = strip(g, 'mini', 'back', x, by - 4, 1, 12);
-    strip(g, 'orca', 'swim', x + 12, by - 4, 1, 34);
   }
 
   return {
@@ -140,11 +157,11 @@ export function createSheetScene(): Scene {
       c.fillStyle = BG;
       c.fillRect(0, 0, W, H);
       const page = pinned ?? Math.floor(t / PAGE_TIME) % PAGES;
-      if (page === 0) agentsPage(g, AGENT_ROWS[0]);
-      else if (page === 1) agentsPage(g, AGENT_ROWS[1]);
-      else if (page === 2) propsPage(g);
-      else if (page === 3) iconsPage(g);
-      else framesPage(g);
+      if (page <= 2) agentsPage(g, AGENT_ROWS[page]);
+      else if (page === 3) propsPage(g);
+      else if (page === 4) iconsPage(g);
+      else if (page === 5) framesPage(g);
+      else framesPage2(g);
       g.text.draw(`sheet ${page + 1}/${PAGES}${pinned === null ? '  (?page=n to pin)' : ''}`, W - 4, H - 4, {
         size: 3.5, color: DIM, align: 'right', shadow: null,
       });

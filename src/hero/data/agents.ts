@@ -1,5 +1,5 @@
 // Who lives in the agent world, and which project each one will open once
-// the project popover exists. Links are placeholders — edit freely.
+// the project popover exists. Keep in sync with src/content/projects/.
 import type { AgentProfile, CharacterId } from '../types';
 
 const GH = 'https://github.com/SentimentalK';
@@ -7,26 +7,34 @@ const GH = 'https://github.com/SentimentalK';
 export const AGENTS: Record<CharacterId, AgentProfile> = {
   orca: {
     id: 'orca', name: 'ORCA', role: 'dispatcher', color: '#ff4fd8', scale: 2,
-    project: { title: 'MAINSTAY_X', blurb: 'This site: the hub that dispatches everything else.', url: '#', github: `${GH}/mainstayX` },
+    project: { title: 'MAINSTAY_X', blurb: 'This site: the hub that dispatches everything else.', github: `${GH}/mainstayX` },
   },
   clawd: {
     id: 'clawd', name: 'CLAUDE', role: 'builder', color: '#d97757', scale: 2,
-    project: { title: 'CEO', blurb: 'A long-term personal workspace that lets any AI pick up where the last one left off.', url: '#', github: `${GH}/CEO` },
+    project: { title: 'CEO', blurb: 'A long-term personal workspace that lets any AI pick up where the last one left off.', url: 'https://ceo.sentimentalk.com', github: `${GH}/chief-everything-officer` },
   },
   gemini: {
     id: 'gemini', name: 'GEMINI', role: 'researcher', color: '#5b7cfa', scale: 2,
-    project: { title: 'Voice Input', blurb: 'Speak instead of type: a voice input tool.', url: '#', github: `${GH}/voice-input` },
+    project: { title: 'Voice Input', blurb: 'Speak instead of type: a voice input tool.' },
   },
   codex: {
     id: 'codex', name: 'CODEX', role: 'operator', color: '#a0a6ad', scale: 2,
-    project: { title: 'K3s Home Lab', blurb: 'The homelab cluster this page is served from.', url: '#', github: `${GH}/homelab` },
+    project: { title: 'K3s Home Lab', blurb: 'The homelab cluster this page is served from.', github: `${GH}/k3s-homelab` },
   },
   qwen: {
     id: 'qwen', name: 'QWEN', role: 'agent', color: '#7c5cff', scale: 2,
-    project: { title: '008', blurb: 'Project 008.', url: '#', github: `${GH}/008` },
+    project: { title: '008', blurb: 'Project 008.' },
   },
   kimi: {
     id: 'kimi', name: 'KIMI', role: 'reader', color: '#e6edf3', scale: 2,
+    project: null,
+  },
+  glm: {
+    id: 'glm', name: 'GLM', role: 'agent', color: '#7385ff', scale: 2,
+    project: null,
+  },
+  deepseek: {
+    id: 'deepseek', name: 'DEEPSEEK', role: "orca's little cousin", color: '#4d6bfe', scale: 2,
     project: null,
   },
   mini: {

@@ -97,11 +97,11 @@ export class Fx {
     }
   }
 
-  /** Water spout column from Orca's blowhole (call every frame while blowing). */
-  spout(x: number, y: number): void {
+  /** Water spout column from a blowhole (call every frame while blowing). power < 1 = smaller whale. */
+  spout(x: number, y: number, power = 1): void {
     const r = this.rng;
-    for (let i = this.n(2); i > 0; i--)
-      this.emit(x + r.range(-1, 1), y, r.range(-10, 10), r.range(-95, -70), r.range(0.55, 0.85),
+    for (let i = this.n(power < 0.6 ? 1 : 2); i > 0; i--)
+      this.emit(x + r.range(-1, 1), y, r.range(-10, 10) * power, r.range(-95, -70) * power, r.range(0.55, 0.85) * Math.sqrt(power),
         r.chance(0.35) ? '#ffffff' : r.chance(0.5) ? PAL.neonB : '#8fdcff', 170, 1, r.chance(0.2) ? 2 : 1);
   }
 

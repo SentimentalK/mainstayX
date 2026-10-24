@@ -215,10 +215,10 @@ export interface SpriteDef {
 
 /**
  * Character sprite ids. `mini` is the small Clawd sub-agent.
- * Agents (clawd, mini, gemini, codex, qwen, kimi) provide AGENT_ANIMS.
+ * Agents (clawd, mini, gemini, codex, qwen, kimi, glm, deepseek) provide AGENT_ANIMS.
  * orca provides ORCA_ANIMS.
  */
-export type CharacterId = 'clawd' | 'mini' | 'gemini' | 'codex' | 'qwen' | 'kimi' | 'orca';
+export type CharacterId = 'clawd' | 'mini' | 'gemini' | 'codex' | 'qwen' | 'kimi' | 'glm' | 'deepseek' | 'orca';
 /** Props / icons / effects. Anim names for these are listed in PROP_ANIMS. */
 export type PropId = 'packet' | 'icon' | 'fx';
 export type SpriteId = CharacterId | PropId;
@@ -274,5 +274,5 @@ export interface AgentProfile {
   color: string;
   /** Default render scale in the world. */
   scale: number;
-  project: { title: string; blurb: string; url: string; github: string } | null;
+  project: { title: string; blurb: string; url?: string; github?: string } | null;
 }

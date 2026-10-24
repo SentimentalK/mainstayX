@@ -15,7 +15,8 @@ import { Orca } from './orca';
 import { Scheduler } from './scheduler';
 import { SKITS } from './skits';
 
-const MAIN: readonly CharacterId[] = ['clawd', 'gemini', 'codex', 'qwen', 'kimi'];
+// clawd must stay first: the mini sub-agent tethers are drawn from agents[0].
+const MAIN: readonly CharacterId[] = ['clawd', 'gemini', 'codex', 'qwen', 'kimi', 'glm', 'deepseek'];
 const MAX_MINIS = 3;
 const MAX_TASKS = 2;
 
@@ -104,8 +105,8 @@ export class World {
     if (this.hovered === m) this.setHover(null);
   }
 
-  /** Rate-limited, panned sfx. low = may be dropped first (typing, hover). */
-  sfx(name: SfxName, x: number, vol = 0.5, low = false): void {
+  /** Rate-limited, panned sfx. low = may be dropped first (typing, hover). detune in semitones. */
+  sfx(name: SfxName, x: number, vol = 0.5, low = false, detune = 0): void {
     const gap = name === 'type' ? 0.34 : 0.12;
     const last = this.lastSfx[name];
     if (last !== undefined && this.time - last < gap) return;
@@ -113,7 +114,7 @@ export class World {
     this.tokens -= 1;
     this.lastSfx[name] = this.time;
     const pan = Math.max(-0.9, Math.min(0.9, (x / W) * 2 - 1));
-    this.ctx.audio.sfx(name, { volume: vol, pan });
+    this.ctx.audio.sfx(name, detune ? { volume: vol, pan, detune } : { volume: vol, pan });
   }
 
   shake(a: number, d: number): void { this.ctx.shake(a, d); }

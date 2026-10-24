@@ -37,14 +37,22 @@ smoother, simpler.
 
 ## Sprites
 - Original silhouettes, sizes and palettes kept; everything else got animation frames via a
-  small pose "rig" (`src/sprites/art/rig.ts`). Codex became a terminal-on-a-stand whose screen is
+  small pose "rig" (`src/hero/sprites/art/rig.ts`). Codex became a terminal-on-a-stand whose screen is
   its face (`>_`, `^ ^`, `x x`); Kimi a ghost whose hem ripples when walking; Gemini's sparkle
   lags and twinkles. Orca was mirrored to face right like every other sprite.
 - `mini` is its own 9×6 matrix drawn at 1×, not a scaled-down Clawd.
+- **GLM and DeepSeek** joined later (`src/hero/sprites/art/newcomers.ts`). GLM is a navy visor-bot with a
+  "Z" bolt antenna (boxy, tallest at 12×14, so it can't be mistaken for Gemini's star blob or Qwen's
+  bean); DeepSeek is a 13×12 blue whale with an up-curled fluke, blush and a tiny spout, so it reads
+  as Orca's little cousin rather than a second Orca. Both have `project: null` for now.
 
 ## World
-- **13 skits** — the 8 from the brief plus bug hunt, code review (`lgtm` stamp), context overflow
-  (`where's my ctx??` with flying pages), coffee run and merge-conflict tug-of-war.
+- **14 skits** — the 8 from the brief plus bug hunt, code review (`lgtm` stamp), context overflow
+  (`where's my ctx??` with flying pages), coffee run, merge-conflict tug-of-war and whale song
+  (DeepSeek swims up to Orca, they trade sonar calls, then a spout duet: the cousin's first try is a
+  dribble, the second meets Orca's jet in a rainbow).
+- **7 agents + Orca**: homes are three per flank with DeepSeek front-centre below Orca; meetings
+  have one seat per agent (7).
 - Scheduler: weighted pick + per-skit cooldown + 4.5–8 s gap between starts, at most 2 at once
   (second one only 40% of the time); skits that haven't run for a while get boosted weight;
   every skit has a hard timeout that releases its actors.
@@ -55,7 +63,7 @@ smoother, simpler.
 
 ## Audio
 - A-minor, 108 BPM, 32-bar loop (≈71 s): intro / A / B / breakdown / A′. Tune lives in
-  `src/audio/song.ts`; the format is documented at the top of that file.
+  `src/hero/audio/song.ts`; the format is documented at the top of that file.
 - While muted the music keeps running silently, so unmuting resumes in place.
 - Every sfx is rate-limited per name and voices are capped, so busy skits can't get loud.
 

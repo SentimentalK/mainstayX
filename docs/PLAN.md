@@ -8,20 +8,20 @@ chiptune. Spec: `design/CLOUD_PROMPT.md`. Visual reference: `design/synthwave/`.
 
 | Module | Files | Owner |
 |---|---|---|
-| Shared contracts | `src/types.ts` | lead |
-| Engine | `src/engine/*` (`director` state machine + fixed-step loop, `display` scaling/bloom/scanlines, `text` Silkscreen text + bubbles, `draw` pixel primitives, `particles`, `rng`, `ease`, `params`) | lead |
-| Data | `src/data/agents.ts` (profiles + `openAgent()`), `src/data/theme.ts` (palette) | lead |
-| Entry | `index.html`, `src/main.ts`, `src/style.css` | lead |
-| Sprite renderer | `src/sprites/render.ts` (cache + `drawSprite`/`frameAt`/`spriteSize`) | lead |
-| **Sprites** | `src/sprites/defs.ts` (+ optional `src/sprites/art/*`), `src/scenes/sheet.ts` | sprites agent |
-| **Audio** | `src/audio/**` | audio agent |
-| **World** | `src/scenes/world.ts`, `src/world/**` | world agent |
-| **Intro** | `src/scenes/intro.ts`, `src/scenes/warp.ts`, `src/scenes/intro/**` | intro agent |
+| Shared contracts | `src/hero/types.ts` | lead |
+| Engine | `src/hero/engine/*` (`director` state machine + fixed-step loop, `display` scaling/bloom/scanlines, `text` Silkscreen text + bubbles, `draw` pixel primitives, `particles`, `rng`, `ease`, `params`) | lead |
+| Data | `src/hero/data/agents.ts` (profiles + `openAgent()`), `src/hero/data/theme.ts` (palette) | lead |
+| Entry | `index.html`, `src/hero/mount.ts`, `src/hero/hero.css` | lead |
+| Sprite renderer | `src/hero/sprites/render.ts` (cache + `drawSprite`/`frameAt`/`spriteSize`) | lead |
+| **Sprites** | `src/hero/sprites/defs.ts` (+ optional `src/hero/sprites/art/*`), `src/hero/scenes/sheet.ts` | sprites agent |
+| **Audio** | `src/hero/audio/**` | audio agent |
+| **World** | `src/hero/scenes/world.ts`, `src/hero/world/**` | world agent |
+| **Intro** | `src/hero/scenes/intro.ts`, `src/hero/scenes/warp.ts`, `src/hero/scenes/intro/**` | intro agent |
 | Deploy | `Dockerfile`, `nginx.conf`, `deploy/k8s/*`, `README.md` | lead |
 
 Nobody edits files they don't own. Contract changes go through the lead.
 
-## Interfaces (see `src/types.ts` for the source of truth)
+## Interfaces (see `src/hero/types.ts` for the source of truth)
 
 **Scene** — `enter(ctx) / update(dt) / render(g) / exit?() / pointerDown?(x,y) / debug?()`.
 `update` runs at a fixed 60 Hz (`STEP`). `render` gets `g.ctx` (320×180, already
@@ -53,7 +53,7 @@ Mute persists in localStorage `mx.muted`.
 
 **World** — `createWorldScene(): Scene`. Agent state machines + weighted,
 cooldown-limited random event scheduler (max 1–2 concurrent "skits").
-Clicking an agent calls `openAgent(id)` from `src/data/agents.ts`.
+Clicking an agent calls `openAgent(id)` from `src/hero/data/agents.ts`.
 `debug()` returns `{ activeEvents, eventCounts, agents: [{id,state,x,y}], particles, packets, minis, ... }`. Dev hook: `window.__mxWorld.trigger(name)` (with `?debug=1`) starts a skit immediately.
 
 **Text** — `text.draw(str, x, y, style)`, `text.measure(str, size)`,
@@ -62,7 +62,7 @@ label ≈ 4, bubble ≈ 4.5, hint ≈ 6, big KNOCK! ≈ 11.
 
 ## Rules for everyone
 
-- Palette from `src/data/theme.ts` (and sprite palettes). No official logos.
+- Palette from `src/hero/data/theme.ts` (and sprite palettes). No official logos.
 - All randomness through `ctx.rng` (or a `fork()` of it) so `?seed=` reproduces.
 - Hot loop: no per-frame allocation of arrays/objects/closures where avoidable;
   pre-render static layers with `makeLayer()`.

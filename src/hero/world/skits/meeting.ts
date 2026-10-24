@@ -73,7 +73,7 @@ export const meeting: SkitDef = {
   name: 'meeting', weight: 1.6, cooldown: 55, timeout: 24, exclusive: true,
   cast: w => {
     const c = w.pick(0, false);
-    return c && c.length >= 3 ? c.slice(0, Math.min(5, c.length)) : null;
+    return c && c.length >= 3 ? c.slice(0, Math.min(SEATS.length, c.length)) : null;
   },
   make: (w, a) => new Meeting('meeting', w, a),
 };
