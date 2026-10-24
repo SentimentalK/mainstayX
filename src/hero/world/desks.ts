@@ -45,6 +45,8 @@ export function sideOffset(): number { return STATION.w / 2 + SIDE_GAP; }
 /** Top of the monitor (a tall agent standing behind may poke a few px above it). */
 export function plotTop(by: number): number { return by - STATION.h - 1; }
 export function plotBot(by: number): number { return by + 3; }
+/** Half-width of the strip where a standing 2× agent reads as sitting at a desk (its body overlaps an end seat). */
+const LOITER_HALF = (): number => plotHalf() + 3;
 
 export class Desk {
   readonly seats: (Agent | null)[] = [null, null, null, null];
@@ -164,11 +166,26 @@ export class Desks {
     return false;
   }
 
-  /** Nudge a loitering agent off any desk it's standing on (not its own). */
+  /** Move a walk target that lands at someone else's desk to just beside it (a's own / visited desk is fine). */
+  clearOf(p: Pt, a: Agent): void {
+    const hp = LOITER_HALF();
+    for (let pass = 0; pass < 3; pass++) {
+      let moved = false;
+      for (const d of this.list) {
+        if (!d.landed || a.desk === d || a.visiting === d) continue;
+        if (p.x <= d.cx - hp || p.x >= d.cx + hp || p.y <= d.by - BEHIND || p.y >= plotBot(d.by)) continue;
+        p.x = p.x < d.cx ? d.cx - hp - 2 : d.cx + hp + 2;
+        moved = true;
+      }
+      if (!moved) return;
+    }
+  }
+
+  /** Nudge a loitering agent off any desk it's standing at (not its own): standing still behind or beside a desk reads as sitting there. */
   nudge(a: Agent, dt: number): void {
-    const hp = plotHalf() - 4;
+    const hp = LOITER_HALF();
     for (const d of this.list) {
-      if (!d.landed || a.desk === d) continue;
+      if (!d.landed || a.desk === d || a.visiting === d) continue;
       if (a.x <= d.cx - hp || a.x >= d.cx + hp || a.y <= d.by - BEHIND || a.y >= plotBot(d.by)) continue;
       a.x += (a.x < d.cx ? -1 : 1) * 20 * dt;
       a.y += (a.y < d.by - 6 ? -1 : 1) * 8 * dt;

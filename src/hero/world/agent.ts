@@ -129,6 +129,8 @@ export class Agent implements Anchor {
   job: Job | null = null;
   summoner: Agent | null = null;
   desk: Desk | null = null;
+  /** A foreign desk this agent hangs around on purpose (the wrong-desk skit); otherwise it's nudged off. */
+  visiting: Desk | null = null;
   seatI = -1;
   /** A summoned sub-agent is invisible until this reaches 0 (then it poofs in). */
   hidden = 0;
@@ -200,6 +202,8 @@ export class Agent implements Anchor {
 
   goTo(x: number, y: number, run = false): void {
     tmp.x = x; tmp.y = y;
+    legalize(tmp, this.halfW);
+    this.wd.desks.clearOf(tmp, this);
     legalize(tmp, this.halfW);
     this.tx = tmp.x; this.ty = tmp.y;
     this.running = run;

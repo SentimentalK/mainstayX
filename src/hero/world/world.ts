@@ -265,7 +265,8 @@ export class World {
     const s = this.sorted;
     for (let i = 0; i < s.length; i++) {
       const a = s[i];
-      if (!a.owner && !a.moving && !this.pinned(a)) this.desks.nudge(a, dt);
+      // skit actors too: anyone standing still at someone else's desk looks like they took the seat
+      if (!a.moving && !this.pinned(a)) this.desks.nudge(a, dt);
       for (let j = i + 1; j < s.length; j++) {
         const b = s[j];
         if ((a.owner && b.owner) || Math.abs(b.y - a.y) > 12 || a.hidden > 0 || b.hidden > 0) continue;
@@ -394,9 +395,10 @@ export class World {
   }
 
   debug(): unknown {
-    const agents: { id: string; state: string; x: number; y: number }[] = [];
-    for (const a of this.agents) agents.push({ id: a.id, state: a.stateLabel(), x: Math.round(a.x), y: Math.round(a.y) });
-    for (const m of this.subs) agents.push({ id: m.id, state: m.stateLabel(), x: Math.round(m.x), y: Math.round(m.y) });
+    const agents: { id: string; state: string; x: number; y: number; desk: number | null; moving: boolean }[] = [];
+    for (const a of [...this.agents, ...this.subs]) {
+      agents.push({ id: a.id, state: a.stateLabel(), x: Math.round(a.x), y: Math.round(a.y), desk: a.desk?.id ?? null, moving: a.moving });
+    }
     return {
       activeEvents: this.scheduler.active.map(s => s.name),
       eventCounts: { ...this.scheduler.counts },

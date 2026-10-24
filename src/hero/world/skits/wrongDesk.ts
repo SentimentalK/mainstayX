@@ -27,10 +27,13 @@ class WrongDesk extends Skit {
     const a = this.actors[0], d = this.desk, w = this.w;
     const p = w.desks.seatPos(d, this.seat, { x: 0, y: 0 }, a.small);
     this.sx = p.x;
+    a.visiting = d;
     const out = this.seat === 0 ? -1 : 1;
     a.goTo(p.x + out * (a.w / 2 + 6), p.y);
     a.talk(w.srng.pick(['ooh, free desk', 'mind if i...', 'comfy!', 'nice setup']), 1.3);
   }
+
+  protected override cleanup(): void { this.actors[0].visiting = null; }
 
   step(dt: number): void {
     const a = this.actors[0], d = this.desk, w = this.w, r = w.srng;
