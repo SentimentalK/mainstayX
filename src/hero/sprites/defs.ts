@@ -3,8 +3,10 @@
 // Preview everything with ?scene=sheet.
 import type { SpriteDef, SpriteId } from '../types';
 import { CLAWD, CODEX, GEMINI, KIMI_DEF, MINI, QWEN_DEF } from './art/agents';
+import { DEEPSEEK_MINI, GLM_MINI } from './art/minis';
 import { DEEPSEEK, GLM_DEF } from './art/newcomers';
 import { ORCA } from './art/orca';
+import { GPT_DEF, GROK_DEF } from './art/peers';
 import { EFFECTS, ICON, PACKET } from './art/props';
 import { validate } from './art/util';
 
@@ -17,11 +19,10 @@ export const SPRITES: Record<SpriteId, SpriteDef> = {
   kimi: KIMI_DEF,
   glm: GLM_DEF,
   deepseek: DEEPSEEK,
-  // TODO(art): placeholders until the real GPT / Grok / OpenCode-mini sprites land.
-  gpt: CODEX,
-  grok: KIMI_DEF,
-  glmMini: MINI,
-  deepseekMini: MINI,
+  gpt: GPT_DEF,
+  grok: GROK_DEF,
+  glmMini: GLM_MINI,
+  deepseekMini: DEEPSEEK_MINI,
   orca: ORCA,
   packet: PACKET,
   icon: ICON,
