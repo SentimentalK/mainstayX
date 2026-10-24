@@ -54,7 +54,7 @@ Mute persists in localStorage `mx.muted`.
 **World** — `createWorldScene(): Scene`. Agent state machines + weighted,
 cooldown-limited random event scheduler (max 1–2 concurrent "skits").
 Clicking an agent calls `openAgent(id)` from `src/data/agents.ts`.
-`debug()` returns `{ activeEvents, eventCounts, agents: [{id,state,x,y}], particles, packets }`.
+`debug()` returns `{ activeEvents, eventCounts, agents: [{id,state,x,y}], particles, packets, minis, ... }`. Dev hook: `window.__mxWorld.trigger(name)` (with `?debug=1`) starts a skit immediately.
 
 **Text** — `text.draw(str, x, y, style)`, `text.measure(str, size)`,
 `text.bubble(str, x, y, style)` (tail tip at x,y). Sizes are low-res px:

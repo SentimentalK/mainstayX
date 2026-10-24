@@ -24,3 +24,42 @@ smoother, simpler.
   so BGM starts on their first click/key anywhere (browsers forbid earlier).
 - **HUD buttons** (skip / replay / mute) live inside the letterboxed stage, not the viewport
   corner, so they sit on the artwork. `Esc` skips, `M` toggles mute.
+
+## Intro
+- **Knocking counts anywhere on the stage**, not only on the door: less frustrating, and the
+  `KNOCK!` popups still appear around the door (alternating sides). Enter/Space knocks too.
+- **Status light has 3 segments** that turn cyan → pink, one per knock, so progress is visible.
+- **Light cone is peach-pink**, not the reference yellow: yellow at low opacity over the purple
+  ground turned olive.
+- **Clawd emerges as a silhouette** against the glare and gains colour as he walks out, then
+  fades back into the light.
+- Timings: OPEN ≈ 1.2 s, GREET ≈ 3.5 s, WARP ≈ 2.8 s (zoom into the doorway 0.75 s, then tunnel).
+
+## Sprites
+- Original silhouettes, sizes and palettes kept; everything else got animation frames via a
+  small pose "rig" (`src/sprites/art/rig.ts`). Codex became a terminal-on-a-stand whose screen is
+  its face (`>_`, `^ ^`, `x x`); Kimi a ghost whose hem ripples when walking; Gemini's sparkle
+  lags and twinkles. Orca was mirrored to face right like every other sprite.
+- `mini` is its own 9×6 matrix drawn at 1×, not a scaled-down Clawd.
+
+## World
+- **13 skits** — the 8 from the brief plus bug hunt, code review (`lgtm` stamp), context overflow
+  (`where's my ctx??` with flying pages), coffee run and merge-conflict tug-of-war.
+- Scheduler: weighted pick + per-skit cooldown + 4.5–8 s gap between starts, at most 2 at once
+  (second one only 40% of the time); skits that haven't run for a while get boosted weight;
+  every skit has a hard timeout that releases its actors.
+- **Labels**: every agent's name is shown dimly, the hovered one brightly with a cyan outline.
+  The approved reference labelled everyone, but at full brightness it got cluttered.
+- Orca dispatches to at most 2 agents at a time, picking whoever has idled longest, and pauses
+  dispatching during meetings.
+
+## Audio
+- A-minor, 108 BPM, 32-bar loop (≈71 s): intro / A / B / breakdown / A′. Tune lives in
+  `src/audio/song.ts`; the format is documented at the top of that file.
+- While muted the music keeps running silently, so unmuting resumes in place.
+- Every sfx is rate-limited per name and voices are capped, so busy skits can't get loud.
+
+## Deploy
+- Image listens on **8080 as the unprivileged `nginx` user** (k8s `runAsNonRoot`), serves
+  `/healthz` for probes. Base `nginx:stable-alpine`.
+- Ingress defaults to `ingressClassName: traefik` (k3s' built-in controller).
