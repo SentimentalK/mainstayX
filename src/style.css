@@ -1,0 +1,49 @@
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; height: 100%; background: #000; color: #ffe6f7; overflow: hidden;
+  font-family: 'Silkscreen', ui-monospace, monospace;
+}
+#app {
+  position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+}
+.stage {
+  position: relative; flex: none; overflow: hidden; background: #000;
+  touch-action: manipulation; user-select: none; -webkit-user-select: none; outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.stage:focus-visible { box-shadow: 0 0 0 2px #3df5ff; }
+.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.stage canvas.main, .stage canvas.bloom { image-rendering: pixelated; image-rendering: crisp-edges; }
+.stage canvas.bloom { mix-blend-mode: screen; opacity: .7; pointer-events: none; }
+.stage canvas.ui { pointer-events: none; }
+/* one dark line per low-res pixel row */
+.stage .scan {
+  position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(to bottom, #000 0 calc(var(--px, 4px) * .32), transparent calc(var(--px, 4px) * .32) var(--px, 4px));
+}
+
+.hud {
+  position: absolute; right: calc(var(--px, 4px) * 4); bottom: calc(var(--px, 4px) * 3);
+  display: flex; gap: calc(var(--px, 4px) * 2); z-index: 2;
+}
+.hud.left { right: auto; left: calc(var(--px, 4px) * 4); }
+.hud button {
+  font: inherit; font-size: max(10px, calc(var(--px, 4px) * 4)); line-height: 1;
+  color: #ffe6f7; background: rgba(13, 2, 33, .72); cursor: pointer;
+  border: max(1px, calc(var(--px, 4px) * .5)) solid #ff4fd8; border-radius: 0;
+  padding: calc(var(--px, 4px) * 1) calc(var(--px, 4px) * 2);
+  box-shadow: 0 0 calc(var(--px, 4px) * 2) rgba(255, 79, 216, .45);
+  opacity: .8; transition: opacity .15s, color .15s;
+}
+.hud button:hover, .hud button:focus-visible { opacity: 1; color: #3df5ff; border-color: #3df5ff; outline: none; }
+.hud button[hidden] { display: none; }
+
+.sr-only {
+  position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+.noscript { position: fixed; inset: auto 0 1rem; text-align: center; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hud button { transition: none; }
+}
