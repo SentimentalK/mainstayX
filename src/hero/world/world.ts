@@ -150,6 +150,7 @@ export class World {
 
   /** Rate-limited, panned sfx. low = may be dropped first (typing, hover). detune in semitones. */
   sfx(name: SfxName, x: number, vol = 0.5, low = false, detune = 0): void {
+    if (this.silent) return;
     const gap = name === 'type' ? 0.34 : 0.12;
     const last = this.lastSfx[name];
     if (last !== undefined && this.time - last < gap) return;
@@ -160,7 +161,17 @@ export class World {
     this.ctx.audio.sfx(name, detune ? { volume: vol, pan, detune } : { volume: vol, pan });
   }
 
-  shake(a: number, d: number): void { this.ctx.shake(a, d); }
+  shake(a: number, d: number): void { if (!this.silent) this.ctx.shake(a, d); }
+
+  /** True while pre-rolling: no sound, no screen shake. */
+  private silent = false;
+
+  /** Fast-forward `seconds` of simulation off-screen, so every visit opens mid-action. */
+  preroll(seconds: number, step: number): void {
+    this.silent = true;
+    for (let t = 0; t < seconds; t += step) this.update(step);
+    this.silent = false;
+  }
 
   // ------------------------------------------------------------ Orca's task loop
 
@@ -208,11 +219,13 @@ export class World {
     if (best) this.dispatch(best, this.pickSize(best));
   }
 
-  /** Test hook: hand a job of `size` to `id` (or to whoever can take one). Returns the agent id. */
+  /** Test hook: hand a job of `size` to `id` (or to a random agent who can take one, awake first). Returns the agent id. */
   forceJob(size: JobSize, id?: CharacterId): CharacterId | null {
-    let a: Agent | null = null;
-    for (const b of this.agents) if ((!id || b.id === id) && this.dispatchable(b, true) && (!a || (a.offline && !b.offline))) a = b;
-    if (!a) return null;
+    const ok = this.agents.filter(b => (!id || b.id === id) && this.dispatchable(b, true));
+    const awake = ok.filter(b => !b.offline);
+    const pool = awake.length ? awake : ok;
+    if (!pool.length) return null;
+    const a = this.drng.pick(pool);
     this.dispatch(a, size);
     return a.id;
   }

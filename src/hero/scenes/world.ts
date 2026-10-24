@@ -1,6 +1,7 @@
 // WORLD scene: the busy little agent office around Orca. All logic lives in
 // src/hero/world/** — this file only adapts World to the Scene interface.
 import type { CharacterId, Gfx, Scene, SceneContext } from '../types';
+import { STEP } from '../types';
 import type { JobSize } from '../world/jobs';
 import { World } from '../world/world';
 
@@ -23,6 +24,8 @@ export function createWorldScene(): Scene {
   return {
     enter(ctx: SceneContext) {
       const w = (world = new World(ctx));
+      // Don't open on the same tableau every visit: start somewhere in the middle of things.
+      w.preroll(ctx.rng.range(6, 20), STEP);
       ctx.audio.music(true);
       if (import.meta.env.DEV || ctx.params.debug) {
         const hooks: WorldHooks = {
