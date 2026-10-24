@@ -47,19 +47,72 @@ smoother, simpler.
   as Orca's little cousin rather than a second Orca. Both have `project: null` for now.
 
 ## World
-- **14 skits** — the 8 from the brief plus bug hunt, code review (`lgtm` stamp), context overflow
-  (`where's my ctx??` with flying pages), coffee run, merge-conflict tug-of-war and whale song
-  (DeepSeek swims up to Orca, they trade sonar calls, then a spout duet: the cousin's first try is a
-  dribble, the second meets Orca's jet in a rainbow).
-- **7 agents + Orca**: homes are three per flank with DeepSeek front-centre below Orca; meetings
-  have one seat per agent (7).
-- Scheduler: weighted pick + per-skit cooldown + 4.5–8 s gap between starts, at most 2 at once
-  (second one only 40% of the time); skits that haven't run for a while get boosted weight;
-  every skit has a hard timeout that releases its actors.
-- **Labels**: every agent's name is shown dimly, the hovered one brightly with a cyan outline.
-  The approved reference labelled everyone, but at full brightness it got cluttered.
-- Orca dispatches to at most 2 agents at a time, picking whoever has idled longest, and pauses
-  dispatching during meetings.
+- **Characters are models, workstations are tools.** The cast comes from `AGENT_PROFILE`s, not a list
+  in the world: `world/roster.ts` puts every `onStage` agent with a tool on stage (Claude first),
+  treats anything in some profile's `summons` as a sub-agent, and everything else that's off stage as
+  benched (Codex, Qwen, Kimi). On stage: Claude (Claude Code), GPT (Codex), Grok (Cursor), Gemini
+  (Antigravity), GLM and DeepSeek (OpenCode). Homes are two per flank and two in front, DeepSeek
+  front-centre below its big cousin.
+- **Portable desks** (`world/desks.ts`). With a job, an agent first looks for a free seat at a desk
+  of *its own tool* within ~100 px; failing that it tosses the crate out of its pocket (an arc drawn
+  with `drawPocketCube`, 1 toss in 8 bonks it on the head first), the crate lands with dust, unfolds
+  (`drawStation` unfold 0→1) and the agent's own seat is right where it stood. A desk has 4 seats:
+  two ends on the floor at `cx ∓ (w/2 + 6)` and two behind it at `cx ∓ 17`, where a 2× agent stands
+  at `by − 6` (drawn before the desk, which hides its legs) and a 1× sub-agent hops onto the desktop
+  at `by − 14` (drawn after it: `Agent.depth`). 2× agents prefer the ends, sub-agents the desktop.
+  Desks go anywhere a "plot" (desk + seated agents) fits: inside the floor, off Orca's keep-out
+  ellipse and its sprite/label box (`ORCA_VIS`), clear of every other plot, and high enough that
+  names under the end seats stay on screen. Empty for 3.5–6.5 s → it folds and flies into its owner's
+  pocket (or the nearest agent of that tool), or poofs if nobody's around. Nameplates are drawn on
+  the text layer at `platePos` once `unfold ≥ PLATE_READY`. Seats are only taken through
+  `Desks.reserve`, which refuses another tool's desk, so the "never at another tool's desk / never
+  two in a seat" rule holds by construction; a seat stays reserved while its agent is pulled into a
+  skit, and it walks back afterwards.
+- **Jobs** (`world/jobs.ts`): S 52%, M 30%, L 18% (L only for agents that can summon, one at a time).
+  The packet grows with the size (medium glows, large is 2×, pulsing, with a sparkle trail and
+  confetti on arrival; Orca calls "big one!"). Small: work alone. Medium: 2–4 sub-agents, large:
+  6–10 (capped at 12 alive across all jobs). Claude summons its own `mini`s onto Claude Code desks:
+  its own desk first, then new ones *it* throws. GPT, Grok and Gemini summon OpenCode sub-agents
+  (`glmMini` / `deepseekMini`) who throw OpenCode desks next to the caller (or join an OpenCode desk
+  nearby, e.g. GLM's) and never sit at the caller's desk. GLM and DeepSeek have no `summons`, so they
+  always work alone. Sub-agents poof in (staggered), work, send a result packet back along a peer
+  link (the summoner counts `3/8`), then poof out; the summoner waits for the last one and then
+  delivers to Orca. A job has a 55 s hard limit; sub-agents of a finished job are poofed within 2 s.
+  Orca runs at most 3 jobs at once.
+- **Offline**: an agent that idles a while may go offline (max 2 at once): `brb`/`afk`, sleep anim,
+  dimmed, `zzz` and a little striped nightcap. Orca only dispatches to an offline agent when nobody
+  else is free; the packet jolts it awake, it stretches (`*yawn*`), then takes the job. Clicking an
+  offline agent wakes it too.
+- **Working is for show**: typing sparks and a busy screen, plus random business at the desk
+  (icons, mutters, a hop, and after a while `@_@` dizziness). A summoner whose own part is done
+  looks around impatiently until its sub-agents report.
+- **Invariant audit** (`world/audit.ts`, `window.__mxWorld.audit()`): seat tool = agent tool, seat ↔
+  agent bookkeeping, ≤ 4 per desk, desks not overlapping each other / Orca's keep-out zone / Orca's
+  box, no benched character on stage, sub-agents tied to a live job (or one that ended < 4 s ago)
+  and summonable by their summoner, and working agents actually in their seat. With `?debug=1` it
+  runs every sim second and `console.error`s each violation; `scripts/verify.mjs` checks it in the
+  world soak. Other test hooks: `__mxWorld.job(size, id?)`, `.offline(id)`, `.trigger(name)`, `.skits()`.
+
+## Skits
+- **17 skits.** Kept: lost & found, dropped packet, collision, meeting, relay, celebration, bug
+  hunt, code review, context overflow (now Gemini is the one that rarely overflows: "2M ctx?! not
+  enough??"), coffee run, merge conflict and whale song. Removed: `summon-subagents` (sub-agents
+  are now part of real jobs) and `nap` (replaced by offline agents and the desk nap).
+- **New workstation skits** (they only cast while someone is at a desk, otherwise the scheduler
+  falls through to the others): **back to work** (a worker sneaks off toward something shiny; a
+  free colleague, preferably Claude, drags it back by the ear, "ow ow ow", or Orca yells BACK TO
+  WORK and reels it in on a tether), **desk fold** (the desk creaks and snaps shut on whoever is at
+  it; a kick and it springs back open, "unsaved..."), **desk nap** (falls asleep at the desk with a
+  `z` screensaver; one of its sub-agents pokes it or Orca pings), **swarm chaos** (during a big
+  job the sub-agents abandon their desks and zoom around bonking into each other until the summoner
+  or Orca yells SIT DOWN) and **wrong desk** (an idle agent tries a free seat at another tool's desk,
+  which flashes red, WRONG IDE!, and bounces it off; nobody actually sits).
+- Scheduler unchanged: weighted pick + per-skit cooldown + 4.5–8 s gap between starts, at most 2 at
+  once (second one only 40% of the time), staleness boost, hard timeouts. New skits weigh 2–3 with
+  30–45 s cooldowns, like the old ones.
+- **Labels**: every agent's name is shown dimly, the hovered one brightly with a cyan outline
+  (sub-agents have none, and an agent standing behind a desk hides its name so it doesn't sit on
+  the nameplate). Orca pauses dispatching during meetings.
 
 ## Audio
 - A-minor, 108 BPM, 32-bar loop (≈71 s): intro / A / B / breakdown / A′. Tune lives in

@@ -34,7 +34,7 @@ class CtxOverflow extends Skit {
           w.fx.papers(a.x, a.top + 2);
           a.setPose('shock', true);
           a.hop(70);
-          a.talk("where's my ctx??", 1.9);
+          a.talk(a.id === 'gemini' ? '2M ctx?! not enough??' : "where's my ctx??", 1.9);
           w.sfx('oops', a.x, 0.45);
           this.next();
         }
@@ -69,6 +69,7 @@ class CtxOverflow extends Skit {
 
 export const ctxOverflow: SkitDef = {
   name: 'context-overflow', weight: 2.5, cooldown: 40, timeout: 13,
-  cast: w => w.pick(1, true, a => a.id !== 'kimi' || w.srng.chance(0.3)),
+  // Gemini's huge context window makes it the least likely to overflow (but funnier when it does)
+  cast: w => w.pick(1, true, a => a.id !== 'gemini' || w.srng.chance(0.3)),
   make: (w, a) => new CtxOverflow('context-overflow', w, a),
 };

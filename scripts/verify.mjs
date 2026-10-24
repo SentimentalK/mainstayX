@@ -161,9 +161,11 @@ try {
     await ctx.close();
   }
 
-  // 6. World soak with a fixed seed
+  // 6. World soak with a fixed seed. ?debug=1 also makes the world audit its
+  // invariants once a second (violations are console.errors); we call
+  // __mxWorld.audit() ourselves every sample too.
   {
-    const { ctx, page, errors } = await open('?scene=world&seed=123');
+    const { ctx, page, errors } = await open('?scene=world&seed=123&debug=1');
     const cdp = await ctx.newCDPSession(page);
     const heap = async () => {
       await cdp.send('HeapProfiler.collectGarbage');
@@ -171,15 +173,24 @@ try {
     };
     await simWait(page, 3);
     await shot(page, 'world');
+    // a big job up front so sub-agents and several desks show up early
+    const bigLead = await page.evaluate(() => window.__mxWorld.job('L', 'clawd') ?? window.__mxWorld.job('L'));
+    check('world: a large job can be forced', !!bigLead, bigLead);
     const heap0 = await heap();
     const samples = [];
-    let outOfBounds = 0, maxParticles = 0, maxPackets = 0, maxMinis = 0, maxActive = 0;
+    const violations = new Map();
+    let outOfBounds = 0, maxParticles = 0, maxPackets = 0, maxMinis = 0, maxActive = 0, maxDesks = 0;
     const start = Date.now();
     let shotN = 0;
     while (Date.now() - start < SOAK * 1000) {
       await page.waitForTimeout(1000);
       const d = (await dbg(page)).detail ?? {};
       samples.push(d);
+      for (const v of await page.evaluate(() => window.__mxWorld.audit())) {
+        const k = v.replace(/@-?\d+,-?\d+/g, '');
+        violations.set(k, (violations.get(k) ?? 0) + 1);
+      }
+      maxDesks = Math.max(maxDesks, (d.desks ?? []).length);
       for (const a of d.agents ?? []) if (a.x < 0 || a.x > 320 || a.y < 60 || a.y > 180) outOfBounds++;
       maxParticles = Math.max(maxParticles, d.particles ?? 0);
       maxPackets = Math.max(maxPackets, d.packets ?? 0);
@@ -192,12 +203,16 @@ try {
     const simTime = (await dbg(page)).time;
     const counts = last.eventCounts ?? {};
     const kinds = Object.keys(counts).filter(k => counts[k] > 0);
-    report.soak = { seconds: SOAK, simTime, eventCounts: counts, maxParticles, maxPackets, maxMinis, maxActive, heap0, heap1 };
+    report.soak = { seconds: SOAK, simTime, eventCounts: counts, jobSizes: last.jobSizes, maxParticles, maxPackets, maxMinis, maxDesks, maxActive, heap0, heap1, violations: [...violations] };
     check(`world soak: sim ran ≥ 60 s (${simTime.toFixed(1)} s)`, simTime >= 60);
     check('world soak: ≥ 8 different skits happened', kinds.length >= 8, counts);
     check('world soak: never more than 2 skits at once', maxActive <= 2, maxActive);
     check('world soak: agents stay in bounds', outOfBounds === 0, outOfBounds);
-    check('world soak: bounded particles/packets/minis', maxParticles <= 600 && maxPackets <= 40 && maxMinis <= 6, { maxParticles, maxPackets, maxMinis });
+    check('world soak: bounded particles/packets/sub-agents/desks', maxParticles <= 600 && maxPackets <= 40 && maxMinis <= 12 && maxDesks <= 9, { maxParticles, maxPackets, maxMinis, maxDesks });
+    // seats match tools, one agent per seat, <= 4 per desk, desks clear of each other and Orca,
+    // nobody benched on stage, no sub-agent outliving its job
+    check('world soak: audit() never reports a violation', violations.size === 0 && (last.violations ?? 0) === 0, [...violations].slice(0, 8));
+    check('world soak: sub-agents were summoned', maxMinis > 0, maxMinis);
     check('world soak: heap does not grow > 5 MB', heap1 - heap0 < 5 * 1024 * 1024, { heap0, heap1 });
     // Agents keep doing things (not stuck in one state for the whole run)
     const states = {};
@@ -205,6 +220,31 @@ try {
     const stuck = Object.entries(states).filter(([, v]) => v.size < 2).map(([k]) => k);
     check('world soak: every agent changes state', stuck.length === 0, stuck);
     check('world soak: no console errors', errors.length === 0, errors.slice(0, 5));
+    await ctx.close();
+  }
+
+  // 7. Every skit can be started on demand without breaking an invariant.
+  {
+    const { ctx, page, errors } = await open('?scene=world&seed=9&speed=4&debug=1');
+    await simWait(page, 2);
+    await page.evaluate(() => { window.__mxWorld.job('L', 'gpt'); window.__mxWorld.job('M', 'clawd'); });
+    await simWait(page, 8);
+    const names = await page.evaluate(() => window.__mxWorld.skits());
+    const ran = [], bad = [];
+    for (const name of names) {
+      let ok = null;
+      for (let i = 0; i < 12 && !ok; i++) {
+        ok = await page.evaluate(n => window.__mxWorld.trigger(n), name);
+        if (!ok) { await page.evaluate(() => window.__mxWorld.job('M')); await simWait(page, 1); }
+      }
+      if (ok) ran.push(name);
+      await simWait(page, 3);
+      bad.push(...(await page.evaluate(() => window.__mxWorld.audit())));
+    }
+    await shot(page, 'world-skits');
+    check('skits: most skits can be triggered', ran.length >= names.length - 3, { ran, all: names });
+    check('skits: audit stays clean', bad.length === 0, bad.slice(0, 8));
+    check('skits: no console errors', errors.length === 0, errors.slice(0, 5));
     await ctx.close();
   }
 } catch (e) {
