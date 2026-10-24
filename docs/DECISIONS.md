@@ -156,8 +156,8 @@ smoother, simpler.
   back to the home page.
 - Door sign reads `MEET MY AI TEAM` (`SIGN_TEXT` in `scenes/intro/layout.ts`); the sign box is 82 px
   wide to fit it.
-- Brand is written **MAINSTAYX** (no underscore). Blog and About in the nav go to
-  x.com/SentimentalK229 for now, so the on-site blog/about pages and the home "Writing" section were
+- Brand is written **MAINSTAYX** (no underscore). Blog in the nav goes to
+  x.com/SentimentalK229 for now (About was dropped: it pointed to the same place), so the on-site blog/about pages and the home "Writing" section were
   removed (restore from git history when the blog moves on-site). Projects list = public repos with a
   live homepage on the homelab, plus Echolet and the homelab itself; internal tools (tracking, n8n,
   LifeOS MCP) and the Avalon Tunnel decoy host are deliberately left off.

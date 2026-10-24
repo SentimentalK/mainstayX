@@ -4,7 +4,7 @@ Personal site. The home page opens on a synthwave pixel-art door: knock three
 times, Clawd says hi, the camera warps through the door, and you land in a busy
 little world of AI agents dispatched by Orca, with a live-synthesised chiptune
 soundtrack. Below it is a projects section (also its own page); the nav's Blog
-and About go to X.
+goes to X.
 
 Astro (static output) for the site; the hero is plain TypeScript + Canvas2D
 (320×180, scaled to fit its section) + WebAudio. No game framework, no audio
