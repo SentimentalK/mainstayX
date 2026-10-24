@@ -1,0 +1,89 @@
+// World geometry: horizon, floor plane, Orca's keep-out zone, agent homes.
+import type { CharacterId, Rng } from '../types';
+import { W } from '../types';
+
+/** Horizon line (sky above, grid floor below). */
+export const HZ = 70;
+/** Agents' feet live in [FLOOR_TOP, FLOOR_BOT]. */
+export const FLOOR_TOP = 86;
+export const FLOOR_BOT = 172;
+/** Minimum gap between a sprite and the screen edge. */
+export const EDGE = 4;
+
+/** Orca's bottom-centre anchor (before bobbing). */
+export const ORCA_X = 160;
+export const ORCA_Y = 112;
+
+/** Agents' feet never rest inside this ellipse (Orca's body + rings). */
+export const KEEP = { x: 160, y: 106, rx: 52, ry: 24 } as const;
+
+export interface Pt { x: number; y: number }
+
+export function keepDist(x: number, y: number): number {
+  const dx = (x - KEEP.x) / KEEP.rx, dy = (y - KEEP.y) / KEEP.ry;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+export function insideKeep(x: number, y: number, margin = 1): boolean {
+  return keepDist(x, y) < margin;
+}
+
+/** Push a point radially out of the keep ellipse (scaled by margin). Mutates p. */
+export function pushOut(p: Pt, margin = 1.04): void {
+  let nx = (p.x - KEEP.x) / KEEP.rx, ny = (p.y - KEEP.y) / KEEP.ry;
+  let d = Math.sqrt(nx * nx + ny * ny);
+  if (d >= margin) return;
+  if (d < 1e-3) { nx = 0; ny = 1; d = 1; }
+  p.x = KEEP.x + (nx / d) * KEEP.rx * margin;
+  p.y = KEEP.y + (ny / d) * KEEP.ry * margin;
+}
+
+export function clampPt(p: Pt, halfW: number): void {
+  const lo = EDGE + halfW, hi = W - EDGE - halfW;
+  p.x = p.x < lo ? lo : p.x > hi ? hi : p.x;
+  p.y = p.y < FLOOR_TOP ? FLOOR_TOP : p.y > FLOOR_BOT ? FLOOR_BOT : p.y;
+}
+
+/** Make p a legal standing spot: inside the floor, outside Orca's zone. */
+export function legalize(p: Pt, halfW: number): void {
+  clampPt(p, halfW);
+  pushOut(p);
+  clampPt(p, halfW);
+  // pushing out of the ellipse near the top edge can land back inside after clamping
+  if (insideKeep(p.x, p.y)) { p.y = KEEP.y + KEEP.ry * 1.05; clampPt(p, halfW); }
+}
+
+/** Does the straight segment stay clear of Orca's zone? */
+export function segmentClear(x0: number, y0: number, x1: number, y1: number, margin = 1.05): boolean {
+  for (let i = 0; i <= 12; i++) {
+    const k = i / 12;
+    if (insideKeep(x0 + (x1 - x0) * k, y0 + (y1 - y0) * k, margin)) return false;
+  }
+  return true;
+}
+
+/** A random legal spot within r of (cx, cy). Writes into out. */
+export function randomSpot(rng: Rng, cx: number, cy: number, r: number, halfW: number, out: Pt): Pt {
+  for (let i = 0; i < 10; i++) {
+    out.x = cx + rng.range(-r, r);
+    out.y = cy + rng.range(-r * 0.55, r * 0.55);
+    clampPt(out, halfW);
+    if (!insideKeep(out.x, out.y, 1.08)) return out;
+  }
+  legalize(out, halfW);
+  return out;
+}
+
+/** Where each agent hangs out (feet). Spread around Orca like the reference. */
+export const HOMES: Partial<Record<CharacterId, Pt>> = {
+  clawd: { x: 60, y: 100 },
+  gemini: { x: 86, y: 152 },
+  codex: { x: 238, y: 156 },
+  qwen: { x: 278, y: 116 },
+  kimi: { x: 210, y: 90 },
+};
+
+/** Meeting seats around Orca (feet positions), all outside KEEP. */
+export const SEATS: readonly Pt[] = [
+  { x: 98, y: 108 }, { x: 222, y: 108 }, { x: 120, y: 136 }, { x: 200, y: 136 }, { x: 160, y: 142 },
+];
