@@ -1,5 +1,5 @@
 // INTRO scene: DOOR → KNOCK → OPEN → GREET, then hands over to `warp`.
-//  DOOR   synthwave backdrop, neon door + MAINSTAY_X sign, blinking hint.
+//  DOOR   synthwave backdrop, neon door + MEET MY AI TEAM sign, blinking hint.
 //  KNOCK  each click shakes the door, pops a KNOCK!, 3rd knock opens it.
 //  OPEN   leaves slide apart, light floods out, cone on the ground.
 //  GREET  Clawd walks out, waves, says HI!, hops, walks back in → warp.

@@ -1,10 +1,10 @@
-# MAINSTAY_X
+# MAINSTAYX
 
 Personal site. The home page opens on a synthwave pixel-art door: knock three
 times, Clawd says hi, the camera warps through the door, and you land in a busy
 little world of AI agents dispatched by Orca, with a live-synthesised chiptune
-soundtrack. Below it (and on their own pages) are projects, the blog and an
-about page.
+soundtrack. Below it is a projects section (also its own page); the nav's Blog
+and About go to X.
 
 Astro (static output) for the site; the hero is plain TypeScript + Canvas2D
 (320×180, scaled to fit its section) + WebAudio. No game framework, no audio
@@ -38,8 +38,6 @@ gentler animation.
 
 ## Content
 
-- **Blog posts**: Markdown in `src/content/blog/` (`title`, `description`, `date`,
-  optional `tags`, `draft: true` hides a post from production builds).
 - **Projects**: one Markdown file per project in `src/content/projects/`
   (`title`, `blurb`, `status`, optional `url`, `github`, `agent`, `order`).
 - Schemas live in `src/content.config.ts`; a typo in front matter fails the build.
@@ -91,11 +89,11 @@ homelab has no apex→www redirect yet (see `docs/DECISIONS.md`).
 
 ```
 src/
-  pages/             routes: index, projects/, blog/, blog/[slug], about, 404
+  pages/             routes: index, projects/, 404
   layouts/Base.astro shared <head>, nav, footer
-  components/        Nav, Footer, Hero (mounts the pixel scene), ProjectCard, PostList
-  content/           blog/*.md, projects/*.md (schemas in content.config.ts)
-  lib/content.ts     collection queries (sorting, drafts)
+  components/        Nav, Footer, Hero (mounts the pixel scene), ProjectCard
+  content/           projects/*.md (schema in content.config.ts)
+  lib/content.ts     collection queries
   styles/global.css  site tokens + base styles
   hero/              the pixel-art scene, framework-free
     mount.ts         mountHero(el): display, HUD buttons, director

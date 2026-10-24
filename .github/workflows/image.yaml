@@ -63,10 +63,12 @@ jobs:
           }
           check /healthz 200
           check / 200
-          check /blog/ 200
           check /projects/ 200
-          check /about/ 200
           check /definitely-not-a-page 404
+          # Directory redirects must stay relative (no :8080 leaking past Traefik).
+          loc=$(curl -sI http://localhost:8080/projects | tr -d '\r' | sed -n 's/^[Ll]ocation: //p')
+          echo "/projects -> $loc"
+          case "$loc" in *:8080*) echo "absolute redirect leaks the container port"; exit 1;; esac
 
           ASSET=$(curl -s http://localhost:8080/ | grep -o '/_astro/[^"]*\.css' | head -n 1)
           test -n "$ASSET" || { echo "no /_astro/ asset referenced from /"; exit 1; }

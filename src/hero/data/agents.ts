@@ -7,7 +7,7 @@ const GH = 'https://github.com/SentimentalK';
 export const AGENTS: Record<CharacterId, AgentProfile> = {
   orca: {
     id: 'orca', name: 'ORCA', role: 'dispatcher', color: '#ff4fd8', scale: 2,
-    project: { title: 'MAINSTAY_X', blurb: 'This site: the hub that dispatches everything else.', github: `${GH}/mainstayX` },
+    project: { title: 'MAINSTAYX', blurb: 'This site: the hub that dispatches everything else.', github: `${GH}/mainstayX` },
   },
   clawd: {
     id: 'clawd', name: 'CLAUDE', role: 'builder', color: '#d97757', scale: 2,
@@ -15,7 +15,7 @@ export const AGENTS: Record<CharacterId, AgentProfile> = {
   },
   gemini: {
     id: 'gemini', name: 'GEMINI', role: 'researcher', color: '#5b7cfa', scale: 2,
-    project: { title: 'Voice Input', blurb: 'Speak instead of type: a voice input tool.' },
+    project: { title: 'Echolet', blurb: 'Local AI voice typing, 100% on-device.', github: `${GH}/echolet` },
   },
   codex: {
     id: 'codex', name: 'CODEX', role: 'operator', color: '#a0a6ad', scale: 2,
@@ -23,7 +23,7 @@ export const AGENTS: Record<CharacterId, AgentProfile> = {
   },
   qwen: {
     id: 'qwen', name: 'QWEN', role: 'agent', color: '#7c5cff', scale: 2,
-    project: { title: '008', blurb: 'Project 008.' },
+    project: { title: 'Reliquary', blurb: 'A zero-friction voice bridge to your AI exobrain.', url: 'https://reliquary.sentimentalk.com', github: `${GH}/Reliquary` },
   },
   kimi: {
     id: 'kimi', name: 'KIMI', role: 'reader', color: '#e6edf3', scale: 2,

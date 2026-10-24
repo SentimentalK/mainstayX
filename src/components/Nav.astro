@@ -1,9 +1,14 @@
 ---
+const X = 'https://x.com/SentimentalK229';
 const links = [
   { href: '/', label: 'Agents' },
   { href: '/projects/', label: 'Projects' },
-  { href: '/blog/', label: 'Blog' },
-  { href: '/about/', label: 'About' },
+];
+// Writing and "about me" live on X for now.
+const external = [
+  { href: X, label: 'Blog ↗' },
+  { href: X, label: 'About ↗' },
+  { href: 'https://github.com/SentimentalK', label: 'GitHub ↗', cls: 'ext' },
 ];
 const path = Astro.url.pathname;
 const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
@@ -11,12 +16,14 @@ const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWit
 
 <header class="site-nav">
   <nav class="wrap" aria-label="Main">
-    <a class="brand pixel" href="/">MAINSTAY<span>_X</span></a>
+    <a class="brand pixel" href="/">MAINSTAY<span>X</span></a>
     <ul>
       {links.map(l => (
         <li><a class:list={['pixel', { active: isActive(l.href) }]} href={l.href} aria-current={isActive(l.href) ? 'page' : undefined}>{l.label}</a></li>
       ))}
-      <li><a class="pixel ext" href="https://github.com/SentimentalK" rel="me noopener">GitHub ↗</a></li>
+      {external.map(l => (
+        <li><a class:list={['pixel', l.cls]} href={l.href} rel="me noopener">{l.label}</a></li>
+      ))}
     </ul>
   </nav>
 </header>

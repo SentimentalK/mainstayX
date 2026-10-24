@@ -2,11 +2,9 @@
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
 import ProjectCard from '../components/ProjectCard.astro';
-import PostList from '../components/PostList.astro';
-import { getPosts, getProjects } from '../lib/content';
+import { getProjects } from '../lib/content';
 
 const projects = (await getProjects()).slice(0, 6);
-const posts = (await getPosts()).slice(0, 5);
 ---
 
 <Base>
@@ -15,12 +13,6 @@ const posts = (await getPosts()).slice(0, 5);
     <div class="wrap">
       <div class="band-head"><h2>Projects</h2><a href="/projects/">all projects →</a></div>
       <div class="cards">{projects.map(p => <ProjectCard project={p} />)}</div>
-    </div>
-  </section>
-  <section class="band" id="writing">
-    <div class="wrap">
-      <div class="band-head"><h2>Writing</h2><a href="/blog/">all posts →</a></div>
-      <PostList posts={posts} />
     </div>
   </section>
 </Base>
