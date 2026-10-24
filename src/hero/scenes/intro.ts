@@ -12,7 +12,7 @@ import { drawSprite, frameAt, hasAnim } from '../sprites/render';
 import { Backdrop } from './intro/backdrop';
 import { Door, type DoorState } from './intro/door';
 import {
-  BACKDROP_SALT, DOOR_CX, DOOR_HIT, DOOR_W, DOOR_Y, GROUND, SIGN_TEXT_Y,
+  BACKDROP_SALT, DOOR_CX, DOOR_HIT, DOOR_W, DOOR_Y, GROUND, SIGN_TEXT, SIGN_TEXT_Y,
 } from './intro/layout';
 
 type State = 'DOOR' | 'KNOCK' | 'OPEN' | 'GREET';
@@ -224,7 +224,7 @@ export function createIntroScene(): Scene {
       // sign
       let signA = 1;
       if (flickerLeft > 0) signA = Math.floor(flickerLeft * 30) % 3 === 0 ? 0.25 : 1;
-      g.text.draw('MAINSTAY_X', DOOR_CX, SIGN_TEXT_Y, { size: 5, color: PAL.neonB, glow: PAL.neonB, shadow: null, alpha: signA });
+      g.text.draw(SIGN_TEXT, DOOR_CX, SIGN_TEXT_Y, { size: 5, color: PAL.neonB, glow: PAL.neonB, shadow: null, alpha: signA });
 
       // KNOCK! popups
       for (const p of pops) {

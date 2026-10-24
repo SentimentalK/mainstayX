@@ -9,7 +9,7 @@ import { line, makeLayer, mix, rect, type Layer } from '../engine/draw';
 import { easeInCubic, lerp, progress } from '../engine/ease';
 import { Backdrop } from './intro/backdrop';
 import { Door, type DoorState } from './intro/door';
-import { BACKDROP_SALT, DOOR_CX, DOOR_MID_Y, SIGN_TEXT_Y } from './intro/layout';
+import { BACKDROP_SALT, DOOR_CX, DOOR_MID_Y, SIGN_TEXT, SIGN_TEXT_Y } from './intro/layout';
 
 // ---- timings (s)
 const ZOOM = 0.75;          // zoom into the doorway
@@ -117,7 +117,7 @@ export function createWarpScene(): Scene {
         c.drawImage(layer, Math.round(DOOR_CX - DOOR_CX * s), Math.round(fy - DOOR_MID_Y * s), Math.round(W * s), Math.round(H * s));
         // the sign text lives on the text overlay, so scale it along
         const ty = fy + (SIGN_TEXT_Y - DOOR_MID_Y) * s;
-        if (ty > -6 * s) g.text.draw('MAINSTAY_X', DOOR_CX, ty, { size: 5 * s, color: PAL.neonB, glow: PAL.neonB, shadow: null });
+        if (ty > -6 * s) g.text.draw(SIGN_TEXT, DOOR_CX, ty, { size: 5 * s, color: PAL.neonB, glow: PAL.neonB, shadow: null });
       } else {
         const p = tunnelP();
         rect(c, 0, 0, W, H, PAL.warp0);

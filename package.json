@@ -3,19 +3,20 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "MAINSTAY_X — knock on the door, enter the agent world. Synthwave pixel-art landing page.",
+  "description": "MAINSTAY_X \u2014 personal site. Knock on the door, meet my AI team.",
   "scripts": {
-    "dev": "vite",
-    "typecheck": "tsc --noEmit",
-    "build": "tsc --noEmit && vite build",
-    "preview": "vite preview",
+    "dev": "astro dev",
+    "typecheck": "astro check",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
     "verify": "node scripts/verify.mjs"
   },
   "dependencies": {
-    "@fontsource/silkscreen": "^5.3.0"
+    "@fontsource/silkscreen": "^5.3.0",
+    "astro": "^7.4.2"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
-    "vite": "^8.3.5"
+    "@astrojs/check": "^0.9.12",
+    "typescript": "^5.9.3"
   }
 }

@@ -1,12 +1,12 @@
 // Acceptance checks in headless Chromium.
-//   npm run build && npx vite preview --port 4173 &   (or npm run dev)
-//   node scripts/verify.mjs [baseUrl=http://localhost:4173] [soakSeconds=65]
+//   npm run build && npm run preview &   (or npm run dev, then pass http://localhost:4321)
+//   node scripts/verify.mjs [baseUrl=http://localhost:4321] [soakSeconds=65]
 // Writes screenshots + report.json to ./screenshots and exits non-zero on failure.
 import { createRequire } from 'node:module';
 import { mkdirSync, writeFileSync } from 'node:fs';
 
 const { chromium } = createRequire(import.meta.url)('playwright');
-const BASE = (process.argv[2] ?? 'http://localhost:4173').replace(/\/$/, '');
+const BASE = (process.argv[2] ?? 'http://localhost:4321').replace(/\/$/, '');
 const SOAK = Number(process.argv[3] ?? 65);
 const OUT = 'screenshots';
 mkdirSync(OUT, { recursive: true });

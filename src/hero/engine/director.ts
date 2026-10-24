@@ -41,6 +41,8 @@ export class Director {
   private last = 0;
   private running = false;
   private raf = 0;
+  /** The stage is at least partly on screen (it may live in a scrolling page). */
+  private onScreen = true;
   /** Frames rendered / sim steps, for debug and tests. */
   frames = 0;
   steps = 0;
@@ -79,6 +81,10 @@ export class Director {
     this.bindInput();
     this.bindHud();
     document.addEventListener('visibilitychange', () => this.onVisibility());
+    new IntersectionObserver(([e]) => {
+      this.onScreen = e.isIntersecting;
+      this.onVisibility();
+    }).observe(display.stage);
   }
 
   // ---------- flow ----------
@@ -195,7 +201,8 @@ export class Director {
   }
 
   private onVisibility(): void {
-    const hidden = document.hidden;
+    if (!this.scene) return; // observers can fire before start()
+    const hidden = document.hidden || !this.onScreen;
     this.audio.setPaused(hidden);
     if (hidden) {
       this.running = false;
@@ -254,7 +261,9 @@ export class Director {
       this.updateHud();
     });
     addEventListener('keydown', e => {
-      if (e.target instanceof HTMLButtonElement) return;
+      if (!this.onScreen || e.metaKey || e.ctrlKey || e.altKey) return;
+      const t = e.target as HTMLElement;
+      if (t instanceof HTMLButtonElement || t.closest('input, textarea, select, [contenteditable]')) return;
       if (e.key === 'Escape' && this.sceneId !== 'world') this.skip();
       if (e.key === 'm' || e.key === 'M') mute.click();
     });

@@ -1,0 +1,18 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props { project: CollectionEntry<'projects'> }
+const { title, blurb, status, url, github } = Astro.props.project.data;
+---
+
+<article class="card">
+  {status !== 'active' && <span class="tag">{status}</span>}
+  <h3>{title}</h3>
+  <p>{blurb}</p>
+  {(url || github) && (
+    <div class="meta">
+      {url && <a href={url}>visit ↗</a>}
+      {github && <a href={github}>github ↗</a>}
+    </div>
+  )}
+</article>

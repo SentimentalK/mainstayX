@@ -1,5 +1,6 @@
+// The pixel-art hero: door → warp → agent world, mounted into any element.
 import '@fontsource/silkscreen/400.css';
-import './style.css';
+import './hero.css';
 import type { SceneId, SceneFactory } from './types';
 import { Display } from './engine/display';
 import { Text } from './engine/text';
@@ -21,10 +22,10 @@ function button(cls: string, label: string, aria: string): HTMLButtonElement {
   return b;
 }
 
-async function boot(): Promise<void> {
+/** Mount the hero into root; it scales its 320×180 stage to fit root's box. */
+export async function mountHero(root: HTMLElement): Promise<void> {
   const params = readParams();
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const root = document.getElementById('app')!;
   const display = new Display(root, reducedMotion ? POST.bloom * 0.6 : POST.bloom, POST.scan);
   display.stage.tabIndex = 0;
   display.stage.setAttribute('aria-label', 'Pixel-art door. Press Enter to knock.');
@@ -61,4 +62,3 @@ async function boot(): Promise<void> {
   director.start();
 }
 
-void boot();

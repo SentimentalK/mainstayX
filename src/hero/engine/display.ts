@@ -1,5 +1,5 @@
-// Stage: a 320×180 canvas scaled up by an integer factor (nearest neighbour),
-// centred with black bars, plus a blurred "bloom" copy blended with screen,
+// Stage: a 320×180 canvas scaled up to fit its container (nearest neighbour),
+// centred with bars, plus a blurred "bloom" copy blended with screen,
 // faint scanlines and a hi-res overlay for crisp text.
 import { W, H } from '../types';
 
@@ -18,7 +18,7 @@ export class Display {
   /** Device px per low-res px on the UI overlay. */
   uiScale = 1;
 
-  constructor(root: HTMLElement, private bloomPx = 6, scanOpacity = 0.12) {
+  constructor(private root: HTMLElement, private bloomPx = 6, scanOpacity = 0.12) {
     this.stage = document.createElement('div');
     this.stage.className = 'stage';
     this.canvas = this.makeCanvas('main');
@@ -37,7 +37,7 @@ export class Display {
     root.appendChild(this.stage);
     for (const c of [this.ctx, this.bloomCtx]) c.imageSmoothingEnabled = false;
     this.resize();
-    addEventListener('resize', () => this.resize());
+    new ResizeObserver(() => this.resize()).observe(root);
   }
 
   private makeCanvas(cls: string): HTMLCanvasElement {
@@ -48,10 +48,12 @@ export class Display {
   }
 
   resize(): void {
-    const vw = innerWidth, vh = innerHeight;
-    const fit = Math.min(vw / W, vh / H);
-    // Integer scale for crisp pixels; below 1× (tiny phones) fall back to fractional.
-    this.scale = fit >= 1 ? Math.floor(fit) : fit;
+    const fit = Math.min(this.root.clientWidth / W, this.root.clientHeight / H);
+    if (!(fit > 0)) return;
+    // Integer scale for crisp pixels, unless that would leave wide bars; at 3×
+    // and up the uneven pixels of a fractional scale are hard to spot.
+    const whole = Math.floor(fit);
+    this.scale = whole >= 1 && whole >= fit * 0.9 ? whole : fit;
     const cw = Math.round(W * this.scale), ch = Math.round(H * this.scale);
     const s = this.stage.style;
     s.width = cw + 'px'; s.height = ch + 'px';

@@ -1,0 +1,29 @@
+---
+// The pixel-art door → warp → agent world, as one block of the page.
+// The stage scales to fit .hero-mount; resize the section, not the canvas.
+---
+
+<section class="hero" aria-labelledby="hero-title">
+  <h1 id="hero-title" class="sr-only">MAINSTAY_X — meet my AI team</h1>
+  <div id="hero" class="hero-mount" role="application" aria-label="Interactive pixel-art scene"></div>
+  <noscript><p class="noscript pixel">The door needs JavaScript. Everything below works without it.</p></noscript>
+</section>
+
+<script>
+  import { mountHero } from '../hero/mount';
+
+  const el = document.getElementById('hero');
+  if (el) void mountHero(el);
+</script>
+
+<style>
+  .hero {
+    position: relative;
+    /* Fill the first screen, but never taller than the 16:9 stage itself. */
+    height: min(calc(100svh - var(--nav-h)), 56.25vw);
+    min-height: 240px;
+    background: radial-gradient(120% 90% at 50% 40%, #2a0a3f 0%, var(--bg) 70%);
+  }
+  .hero-mount { position: absolute; inset: 0; }
+  .noscript { position: absolute; inset: auto 0 24px; margin: 0; text-align: center; color: var(--muted); }
+</style>

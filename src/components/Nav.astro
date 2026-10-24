@@ -1,0 +1,55 @@
+---
+const links = [
+  { href: '/', label: 'Agents' },
+  { href: '/projects/', label: 'Projects' },
+  { href: '/blog/', label: 'Blog' },
+  { href: '/about/', label: 'About' },
+];
+const path = Astro.url.pathname;
+const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
+---
+
+<header class="site-nav">
+  <nav class="wrap" aria-label="Main">
+    <a class="brand pixel" href="/">MAINSTAY<span>_X</span></a>
+    <ul>
+      {links.map(l => (
+        <li><a class:list={['pixel', { active: isActive(l.href) }]} href={l.href} aria-current={isActive(l.href) ? 'page' : undefined}>{l.label}</a></li>
+      ))}
+      <li><a class="pixel ext" href="https://github.com/SentimentalK" rel="me noopener">GitHub ↗</a></li>
+    </ul>
+  </nav>
+</header>
+
+<style>
+  .site-nav {
+    position: sticky; top: 0; z-index: 10; height: var(--nav-h);
+    background: rgba(13, 2, 33, .86); backdrop-filter: blur(8px);
+    border-bottom: 1px solid transparent;
+    border-image: linear-gradient(90deg, transparent, var(--pink), var(--cyan), transparent) 1;
+    transition: opacity .3s;
+  }
+  /* While the hero intro plays, the nav steps back (it's still usable). */
+  :global(html[data-phase='DOOR']) .site-nav,
+  :global(html[data-phase='KNOCK']) .site-nav,
+  :global(html[data-phase='OPEN']) .site-nav,
+  :global(html[data-phase='GREET']) .site-nav,
+  :global(html[data-phase='WARP']) .site-nav { opacity: .4; }
+  .site-nav:hover, .site-nav:focus-within { opacity: 1 !important; }
+
+  nav { height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+  .brand { font-size: 18px; color: var(--fg); text-decoration: none; text-shadow: 0 0 10px rgba(255, 79, 216, .6); }
+  .brand span { color: var(--pink); }
+  ul { display: flex; gap: 4px; margin: 0; padding: 0; list-style: none; }
+  ul a {
+    display: block; padding: 6px 12px; font-size: 13px; color: var(--muted); text-decoration: none;
+    border-bottom: 2px solid transparent;
+  }
+  ul a:hover { color: var(--cyan); }
+  ul a.active { color: var(--fg); border-bottom-color: var(--pink); }
+  @media (max-width: 560px) {
+    .brand { font-size: 14px; }
+    ul a { padding: 6px 7px; font-size: 11px; }
+    .ext { display: none; }
+  }
+</style>

@@ -63,3 +63,20 @@ smoother, simpler.
 - Image listens on **8080 as the unprivileged `nginx` user** (k8s `runAsNonRoot`), serves
   `/healthz` for probes. Base `nginx:stable-alpine`.
 - Ingress defaults to `ingressClassName: traefik` (k3s' built-in controller).
+
+## Site shell (Astro)
+- The landing page grew into a site (projects, blog, about), so the app moved to **Astro with
+  static output**: Vite under the hood (the hero code moved over unchanged into `src/hero/`),
+  Markdown content collections for posts and projects, and still plain files in `dist/` for nginx.
+- The hero is one section of the home page (`components/Hero.astro` → `mountHero(el)`). Its stage
+  fits the **section**, not the window: integer scale when that fills ≥ 90% of the box, otherwise
+  fractional (at 3× and up uneven pixels are hard to see). The section is
+  `min(100svh − nav, 56.25vw)` tall, so it never shows wide bars above/below the 16:9 stage.
+- It pauses (loop + music) when scrolled out of view, and `Esc`/`M` only act while it's on screen
+  and focus isn't in a form field.
+- During the intro phases the nav dims to 40% (hover/focus restores it) so it doesn't compete with
+  the door, but stays usable.
+- nginx: hashed assets are under `/_astro/`; unknown paths now get `404.html` instead of falling
+  back to the home page.
+- Door sign reads `MEET MY AI TEAM` (`SIGN_TEXT` in `scenes/intro/layout.ts`); the sign box is 82 px
+  wide to fit it.

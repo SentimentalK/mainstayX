@@ -15,7 +15,8 @@ export const DOOR_Y = GROUND - DOOR_H;
 export const DOOR_MID_Y = DOOR_Y + DOOR_H / 2;
 
 /** Neon sign box above the door. */
-export const SIGN_W = 54;
+export const SIGN_TEXT = 'MEET MY AI TEAM';
+export const SIGN_W = 82;
 export const SIGN_H = 11;
 export const SIGN_X = DOOR_CX - SIGN_W / 2;
 export const SIGN_Y = DOOR_Y - 22;
