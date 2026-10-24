@@ -8,10 +8,10 @@
 
 ## 1. 视觉参考（必读）
 
-`design/explorations/` 是我确认过的静态风格稿，打开 `synthwave.html` 就能看到。**只用「落日合成波 synthwave」这一个主题**，其他主题和 1-bit 抖动开关都不要。
+`design/synthwave/` 是我确认过的静态风格稿，打开 `index.html` 就能看到。
 
 - `engine.js`：320×180 低分辨率 Canvas2D 绘制、像素精灵矩阵（Clawd、Orca、各家 agent）、条纹落日、透视网格、门、穿梭速度线、bloom 叠加的做法
-- `themes.js` 里 `id: 'synthwave'` 的调色板：照这个配色走
+- `theme.js`：调色板，照这个配色走
 - 这些素材和构图可以直接沿用、重构、扩展。精灵可以重画得更精致，加更多帧，但要保持同样的像素风和配色
 - 角色是对各家 CLI / AI 的**致敬**：可以用代表色和特征元素，**不要用任何官方 logo 原图**
 
